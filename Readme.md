@@ -1,7 +1,7 @@
 # Личный проект «Большое путешествие» [![Build status][travis-image]][travis-url]
 
-* Студент: [Станислав Кузнецов](https://up.htmlacademy.ru/ecmascript/8/user/237925).
-* Наставник: `Неизвестно`.
+* Студент: [Станислав Кузнецов](https://htmlacademy.ru/profile/id237925).
+* Наставник: [Александр Быков](https://htmlacademy.ru/profile/id7107).
 
 ---
 
