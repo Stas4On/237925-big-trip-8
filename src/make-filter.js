@@ -3,7 +3,7 @@ export default (name, checked = false) => `<input
   id="filter-${name}" 
   name="filter" 
   value="${name}" 
-  ${checked ? `checked` : ``}>
+  ${checked || ``}>
           
   <label class="trip-filter__item" 
   for="filter-${name}">${name}</label>`;
