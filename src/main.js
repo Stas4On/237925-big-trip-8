@@ -1,9 +1,9 @@
 import makeFilter from '../src/make-filter.js';
 import makePoint from '../src/make-trip-point';
 
-const beginCounter = 7;
-const minValueCounter = 1;
-const maxValueCounter = 10; // Не включая
+const BEGIN_COUNTER = 7;
+const MIN_VALUE_COUNTER = 1;
+const MAX_VALUE_COUNTER = 10; // Не включая
 
 const renderPoints = (dist, counter) => {
   const points = new Array(counter)
@@ -22,7 +22,7 @@ filters.insertAdjacentHTML(`beforeend`, makeFilter(`past`));
 
 const pointsContainer = document.querySelector(`.trip-day__items`);
 
-renderPoints(pointsContainer, beginCounter);
+renderPoints(pointsContainer, BEGIN_COUNTER);
 
 const filterList = document.querySelectorAll(`.trip-filter__item`);
 
@@ -32,7 +32,7 @@ for (let i = 0; i < filterList.length; i++) {
 
     if (!input.checked) {
       pointsContainer.innerHTML = ``;
-      renderPoints(pointsContainer, getRandom(minValueCounter, maxValueCounter));
+      renderPoints(pointsContainer, getRandom(MIN_VALUE_COUNTER, MAX_VALUE_COUNTER));
     }
   });
 }
