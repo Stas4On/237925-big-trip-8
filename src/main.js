@@ -16,7 +16,7 @@ const getRandom = (min, max) => Math.floor(Math.random() * (max - min)) + min;
 
 const filters = document.querySelector(`.trip-filter`);
 
-filters.insertAdjacentHTML(`beforeend`, makeFilter(`everything`, `checked`));
+filters.insertAdjacentHTML(`beforeend`, makeFilter(`everything`, true));
 filters.insertAdjacentHTML(`beforeend`, makeFilter(`future`));
 filters.insertAdjacentHTML(`beforeend`, makeFilter(`past`));
 
