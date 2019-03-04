@@ -1,5 +1,6 @@
 import makeFilter from '../src/make-filter.js';
 import makePoint from '../src/make-trip-point';
+import getData from '../src/get-data';
 
 const BEGIN_COUNTER = 7;
 const MIN_VALUE_COUNTER = 1;
@@ -8,7 +9,7 @@ const MAX_VALUE_COUNTER = 10; // Не включая
 const renderPoints = (dist, counter) => {
   const points = new Array(counter)
     .fill()
-    .map(makePoint);
+    .map(() => makePoint(getData()));
   dist.insertAdjacentHTML(`beforeend`, points.join(``));
 };
 
