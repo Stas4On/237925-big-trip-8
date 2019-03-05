@@ -33,8 +33,13 @@ const getDuration = (startTime, endTime) => {
 
 const getOffers = (offersArray, countOffers) => {
   const selectedOffers = [];
+
+  for (let i = offersArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [offersArray[i], offersArray[j]] = [offersArray[j], offersArray[i]];
+  }
   for (let i = 0; i < countOffers; i++) {
-    selectedOffers.push(offersArray[Math.floor(Math.random() * offersArray.length)]);
+    selectedOffers.push(offersArray[i]);
   }
 
   return selectedOffers.map((offer) => `<li>
