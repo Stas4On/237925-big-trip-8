@@ -20,7 +20,7 @@ const getTime = (millisec) => {
   hours = (hours >= 10) ? hours : `0` + hours;
   minutes = (minutes >= 10) ? minutes : `0` + minutes;
 
-  return hours + `:` + minutes;
+  return `${hours}:${minutes}`;
 };
 
 const getDuration = (startTime, endTime) => {
@@ -28,7 +28,7 @@ const getDuration = (startTime, endTime) => {
   const minutes = new Date(duration).getMinutes();
   const hours = new Date(duration).getHours();
 
-  return hours + `h ` + minutes + `m`;
+  return `${hours}h ${minutes}m`;
 };
 
 const getOffers = (offersArray, countOffers) => {
