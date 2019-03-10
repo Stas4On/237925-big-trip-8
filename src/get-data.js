@@ -1,6 +1,12 @@
 export default () => ({
   price: Math.floor(Math.random() * 10) * 10 + 10,
-  picture: `//picsum.photos/100/100?r=${Math.random()}`,
+  picture: [
+    `http://picsum.photos/330/140?r=${Math.random()}`,
+    `http://picsum.photos/300/200?r=${Math.random()}`,
+    `http://picsum.photos/300/100?r=${Math.random()}`,
+    `http://picsum.photos/200/300?r=${Math.random()}`,
+    `http://picsum.photos/100/300?r=${Math.random()}`
+  ],
   description: [
     `Lorem ipsum dolor sit amet, consectetur adipiscing elit.`,
     `Cras aliquet varius magna, non porta ligula feugiat eget.`,
