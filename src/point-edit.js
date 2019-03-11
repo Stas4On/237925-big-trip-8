@@ -38,6 +38,7 @@ export default class PointEdit {
 
   unrender() {
     this.unbind();
+    this._element.remove();
     this._element = null;
   }
 
