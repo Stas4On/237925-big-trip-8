@@ -19,51 +19,6 @@ export default class Point {
     }
   }
 
-  set onEdit(fn) {
-    this._onEdit = fn;
-  }
-
-  bind() {
-    this._element.closest(`.trip-point`)
-      .addEventListener(`click`, this._onPointClick);
-  }
-
-  unbind() {
-    this._element.closest(`.trip-point`)
-      .removeEventListener(`click`, this._onPointClick);
-  }
-
-  unrender() {
-    this.unbind();
-    this._element.remove();
-    this._element = null;
-  }
-
-  get element() {
-    return this._element;
-  }
-
-  get template() {
-    return `<article class="trip-point">
-          <i class="trip-icon">${this._type.icon}</i>
-          <h3 class="trip-point__title">${this._type.name} to ${[...this._destination][Math.floor(Math.random() * 5)]}</h3>
-          <p class="trip-point__schedule">
-            <span class="trip-point__timetable">${this._getTime(this._time.start)}&nbsp;&mdash; ${this._getTime(this._time.end)}</span>
-            <span class="trip-point__duration">${this._getDuration(this._time.start, this._time.end)}</span>
-          </p>
-          <p class="trip-point__price">&euro;&nbsp;${this._price}</p>
-          <ul class="trip-point__offers">
-            ${this._getOffers(this._offers)}
-          </ul>
-        </article>`;
-  }
-
-  render() {
-    this._element = createElement(this.template);
-    this.bind();
-    return this._element;
-  }
-
   _getTime(millisec) {
     let minutes = new Date(millisec).getMinutes();
     let hours = new Date(millisec).getHours();
@@ -97,5 +52,50 @@ export default class Point {
     return selectedOffers.map((offer) => `<li>
               <button class="trip-point__offer">${offer.name} +&euro;&nbsp;${offer.price}</button>
             </li>`).join(``);
+  }
+
+  get element() {
+    return this._element;
+  }
+
+  get template() {
+    return `<article class="trip-point">
+          <i class="trip-icon">${this._type.icon}</i>
+          <h3 class="trip-point__title">${this._type.name} to ${[...this._destination][Math.floor(Math.random() * 5)]}</h3>
+          <p class="trip-point__schedule">
+            <span class="trip-point__timetable">${this._getTime(this._time.start)}&nbsp;&mdash; ${this._getTime(this._time.end)}</span>
+            <span class="trip-point__duration">${this._getDuration(this._time.start, this._time.end)}</span>
+          </p>
+          <p class="trip-point__price">&euro;&nbsp;${this._price}</p>
+          <ul class="trip-point__offers">
+            ${this._getOffers(this._offers)}
+          </ul>
+        </article>`;
+  }
+
+  set onEdit(fn) {
+    this._onEdit = fn;
+  }
+
+  bind() {
+    this._element.closest(`.trip-point`)
+      .addEventListener(`click`, this._onPointClick);
+  }
+
+  unbind() {
+    this._element.closest(`.trip-point`)
+      .removeEventListener(`click`, this._onPointClick);
+  }
+
+  render() {
+    this._element = createElement(this.template);
+    this.bind();
+    return this._element;
+  }
+
+  unrender() {
+    this.unbind();
+    this._element.remove();
+    this._element = null;
   }
 }

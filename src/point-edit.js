@@ -22,24 +22,35 @@ export default class PointEdit {
     }
   }
 
-  set onSubmit(fn) {
-    this._onSubmit = fn;
+  _getTime(millisec) {
+    let minutes = new Date(millisec).getMinutes();
+    let hours = new Date(millisec).getHours();
+
+    hours = (hours >= 10) ? hours : `0` + hours;
+    minutes = (minutes >= 10) ? minutes : `0` + minutes;
+
+    return `${hours}:${minutes}`;
   }
 
-  bind() {
-    this._element.querySelector(`form`)
-      .addEventListener(`submit`, this._onSubmitButtonClick);
+  _getPicture(links) {
+    return links.map((link) => `<img src="${link}" alt="picture from place" class="point__destination-image">`).join(``);
   }
 
-  unbind() {
-    this._element.querySelector(`form`)
-      .removeEventListener(`submit`, this._onSubmitButtonClick);
+  _getOptionDestination(destinations) {
+    return [...destinations].map((destination) => `<option value="${destination}"></option>`).join(``);
+
   }
 
-  unrender() {
-    this.unbind();
-    this._element.remove();
-    this._element = null;
+  _getOffersElement(offers) {
+    return offers.map((offer) => `<input class="point__offers-input visually-hidden" type="checkbox" id="${this._splitString(`${offer.name}`)}" name="offer" value="${this._splitString(`${offer.name}`)}">
+			<label for="${this._splitString(`${offer.name}`)}" class="point__offers-label">
+				<span class="point__offer-service">${offer.name}</span> + €<span class="point__offer-price">${offer.price}</span>
+          </label>`).join(``);
+  }
+
+  _splitString(str) {
+    const strArray = str.split(` `);
+    return strArray.map((word) => word.toLowerCase()).join(`-`);
   }
 
   get element() {
@@ -138,40 +149,29 @@ export default class PointEdit {
 `;
   }
 
+  set onSubmit(fn) {
+    this._onSubmit = fn;
+  }
+
+  bind() {
+    this._element.querySelector(`form`)
+      .addEventListener(`submit`, this._onSubmitButtonClick);
+  }
+
+  unbind() {
+    this._element.querySelector(`form`)
+      .removeEventListener(`submit`, this._onSubmitButtonClick);
+  }
+
   render() {
     this._element = createElement(this.template);
     this.bind();
     return this._element;
   }
 
-  _getPicture(links) {
-    return links.map((link) => `<img src="${link}" alt="picture from place" class="point__destination-image">`).join(``);
-  }
-
-  _getOptionDestination(destinations) {
-    return [...destinations].map((destination) => `<option value="${destination}"></option>`).join(``);
-
-  }
-
-  _getOffersElement(offers) {
-    return offers.map((offer) => `<input class="point__offers-input visually-hidden" type="checkbox" id="${this._splitString(`${offer.name}`)}" name="offer" value="${this._splitString(`${offer.name}`)}">
-			<label for="${this._splitString(`${offer.name}`)}" class="point__offers-label">
-				<span class="point__offer-service">${offer.name}</span> + €<span class="point__offer-price">${offer.price}</span>
-          </label>`).join(``);
-  }
-
-  _splitString(str) {
-    const strArray = str.split(` `);
-    return strArray.map((word) => word.toLowerCase()).join(`-`);
-  }
-
-  _getTime(millisec) {
-    let minutes = new Date(millisec).getMinutes();
-    let hours = new Date(millisec).getHours();
-
-    hours = (hours >= 10) ? hours : `0` + hours;
-    minutes = (minutes >= 10) ? minutes : `0` + minutes;
-
-    return `${hours}:${minutes}`;
+  unrender() {
+    this.unbind();
+    this._element.remove();
+    this._element = null;
   }
 }
