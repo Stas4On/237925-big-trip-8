@@ -1,7 +1,9 @@
-import createElement from '../src/create-element';
+import Component from './component';
+import getTime from './get-time';
 
-export default class PointEdit {
+export default class PointEdit extends Component {
   constructor(data) {
+    super();
     this._price = data.price;
     this._picture = data.picture;
     this._description = data.description;
@@ -20,16 +22,6 @@ export default class PointEdit {
     if (typeof this._onSubmit === `function`) {
       this._onSubmit();
     }
-  }
-
-  _getTime(millisec) {
-    let minutes = new Date(millisec).getMinutes();
-    let hours = new Date(millisec).getHours();
-
-    hours = (hours >= 10) ? hours : `0` + hours;
-    minutes = (minutes >= 10) ? minutes : `0` + minutes;
-
-    return `${hours}:${minutes}`;
   }
 
   _getPicture(links) {
@@ -51,10 +43,6 @@ export default class PointEdit {
   _splitString(str) {
     const strArray = str.split(` `);
     return strArray.map((word) => word.toLowerCase()).join(`-`);
-  }
-
-  get element() {
-    return this._element;
   }
 
   get template() {
@@ -106,7 +94,7 @@ export default class PointEdit {
 
       <label class="point__time">
         choose time
-        <input class="point__input" type="text" value="${this._getTime(this._time.start)} — ${this._getTime(this._time.end)}" name="time" placeholder="00:00 — 00:00">
+        <input class="point__input" type="text" value="${getTime(this._time.start)} — ${getTime(this._time.end)}" name="time" placeholder="00:00 — 00:00">
       </label>
 
       <label class="point__price">
@@ -161,17 +149,5 @@ export default class PointEdit {
   unbind() {
     this._element.querySelector(`form`)
       .removeEventListener(`submit`, this._onSubmitButtonClick);
-  }
-
-  render() {
-    this._element = createElement(this.template);
-    this.bind();
-    return this._element;
-  }
-
-  unrender() {
-    this.unbind();
-    this._element.remove();
-    this._element = null;
   }
 }
