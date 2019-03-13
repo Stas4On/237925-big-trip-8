@@ -1,6 +1,5 @@
 import Component from './component';
-import getTime from './get-time';
-import getDuration from './get-duration';
+import utils from './utils';
 
 export default class Point extends Component {
   constructor(data) {
@@ -44,8 +43,8 @@ export default class Point extends Component {
           <i class="trip-icon">${this._type.icon}</i>
           <h3 class="trip-point__title">${this._type.name} to ${[...this._destination][Math.floor(Math.random() * 5)]}</h3>
           <p class="trip-point__schedule">
-            <span class="trip-point__timetable">${getTime(this._time.start)}&nbsp;&mdash; ${getTime(this._time.end)}</span>
-            <span class="trip-point__duration">${getDuration(this._time.start, this._time.end)}</span>
+            <span class="trip-point__timetable">${utils.getTime(this._time.start)}&nbsp;&mdash; ${utils.getTime(this._time.end)}</span>
+            <span class="trip-point__duration">${utils.getDuration(this._time.start, this._time.end)}</span>
           </p>
           <p class="trip-point__price">&euro;&nbsp;${this._price}</p>
           <ul class="trip-point__offers">

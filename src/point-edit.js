@@ -1,5 +1,5 @@
 import Component from './component';
-import getTime from './get-time';
+import utils from './utils';
 
 export default class PointEdit extends Component {
   constructor(data) {
@@ -94,7 +94,7 @@ export default class PointEdit extends Component {
 
       <label class="point__time">
         choose time
-        <input class="point__input" type="text" value="${getTime(this._time.start)} — ${getTime(this._time.end)}" name="time" placeholder="00:00 — 00:00">
+        <input class="point__input" type="text" value="${utils.getTime(this._time.start)} — ${utils.getTime(this._time.end)}" name="time" placeholder="00:00 — 00:00">
       </label>
 
       <label class="point__price">
