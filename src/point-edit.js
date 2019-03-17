@@ -8,6 +8,7 @@ export default class PointEdit extends Component {
     this._picture = data.picture;
     this._description = data.description;
     this._type = data.type;
+    this._icons = data.icons;
     this._destination = data.destination;
     this._time = data.time;
     this._offers = data.offers;
@@ -17,11 +18,47 @@ export default class PointEdit extends Component {
     this._onSubmitButtonClick = this._onSubmitButtonClick.bind(this);
   }
 
+  _processForm(formData) {
+    const entry = {
+      price: ``,
+      type: ``,
+      destination: new Set(),
+      time: {
+        start: new Date(),
+        end: new Date()
+      },
+      offers: new Set(),
+    };
+
+    const pointEditMapper = PointEdit.createMapper(entry);
+
+    for (const pair of formData.entries()) {
+      const [property, value] = pair;
+
+      console.log(pair);
+
+      if (pointEditMapper[property]) {
+        pointEditMapper[property](value);
+      }
+    }
+
+    return entry;
+  }
+
   _onSubmitButtonClick(evt) {
     evt.preventDefault();
+
+    const currentForm = this._element.querySelector(`form`);
+
+    const formData = new FormData(currentForm);
+
+    const newData = this._processForm(formData);
+
     if (typeof this._onSubmit === `function`) {
-      this._onSubmit();
+      this._onSubmit(newData);
     }
+
+    this.update(newData);
   }
 
   _getPicture(links) {
@@ -34,7 +71,7 @@ export default class PointEdit extends Component {
   }
 
   _getOffersElement(offers) {
-    return offers.map((offer) => `<input class="point__offers-input visually-hidden" type="checkbox" id="${this._splitString(`${offer.name}`)}" name="offer" value="${this._splitString(`${offer.name}`)}">
+    return offers.map((offer) => `<input class="point__offers-input visually-hidden" type="checkbox" id="${this._splitString(`${offer.name}`)}" name="offer" value="${this._splitString(`${offer.name}`)}" ${offer.checked ? `checked` : ``}>
 			<label for="${this._splitString(`${offer.name}`)}" class="point__offers-label">
 				<span class="point__offer-service">${offer.name}</span> + €<span class="point__offer-price">${offer.price}</span>
           </label>`).join(``);
@@ -55,7 +92,7 @@ export default class PointEdit extends Component {
       </label>
 
       <div class="travel-way">
-        <label class="travel-way__label" for="travel-way__toggle">${this._type.icon}</label>
+        <label class="travel-way__label" for="travel-way__toggle">${utils.getIcons(this._icons, this._type)}</label>
 
         <input type="checkbox" class="travel-way__toggle visually-hidden" id="travel-way__toggle">
 
@@ -70,7 +107,7 @@ export default class PointEdit extends Component {
             <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-train" name="travel-way" value="train">
             <label class="travel-way__select-label" for="travel-way-train">🚂 train</label>
 
-            <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-flight" name="travel-way" value="train" checked>
+            <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-flight" name="travel-way" value="flight" checked>
             <label class="travel-way__select-label" for="travel-way-flight">✈️ flight</label>
           </div>
 
@@ -85,7 +122,7 @@ export default class PointEdit extends Component {
       </div>
 
       <div class="point__destination-wrap">
-        <label class="point__destination-label" for="destination">${this._type.name} to</label>
+        <label class="point__destination-label" for="destination">${this._type} to</label>
         <input class="point__destination-input" list="destination-select" id="destination" value="Chamonix" name="destination">
         <datalist id="destination-select">
           ${this._getOptionDestination(this._destination)}
@@ -149,5 +186,24 @@ export default class PointEdit extends Component {
   unbind() {
     this._element.querySelector(`form`)
       .removeEventListener(`submit`, this._onSubmitButtonClick);
+  }
+
+  update(data) {
+    this._price = data.price;
+    this._type = data.type;
+    this._destination = data.destination;
+    this._time = utils.parseTimeInterval(data.time);
+    console.log(`this._type`);
+    console.log(this._type);
+  }
+
+  static createMapper(target) {
+    return {
+      "price": (value) => target.price = value,
+      'travel-way': (value) => target.type = value,
+      "destination": (value) => target.destination.add(value),
+      "time": (value) => target.time = value,
+      "offer": (value) => target.offers.add(value)
+    };
   }
 }

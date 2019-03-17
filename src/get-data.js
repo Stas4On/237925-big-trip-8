@@ -19,18 +19,19 @@ export default () => ({
     `Aliquam erat volutpat. Nunc fermentum tortor ac porta dapibus.`,
     `In rutrum ac purus sit amet tempus`
   ][Math.floor(Math.random() * 10)],
-  type: [
-    {name: `Taxi`, icon: `🚕`},
-    {name: `Bus`, icon: `🚌`},
-    {name: `Train`, icon: `🚂`},
-    {name: `Ship`, icon: `🛳️`},
-    {name: `Transport`, icon: `🚊`},
-    {name: `Drive`, icon: `🚗`},
-    {name: `Flight`, icon: `✈️`},
-    {name: `Check in`, icon: `🏨`},
-    {name: `Sightseeing`, icon: `🏛️`},
-    {name: `Restaurant`, icon: `🍴`}
-  ][Math.floor(Math.random() * 10)],
+  type: getRandomType(),
+  icons: {
+    "Taxi": `🚕`,
+    "Bus": `🚌`,
+    "Train": `🚂`,
+    "Ship": `🛳️`,
+    "Transport": `🚊`,
+    "Drive": `🚗`,
+    "Flight": `✈️`,
+    'Check in': `🏨`,
+    "Sightseeing": `🏛️`,
+    "Restaurant": `🍴`
+  },
   destination: new Set([
     `Airport`,
     `Geneva`,
@@ -43,9 +44,26 @@ export default () => ({
     end: Date.now() + Math.floor(Math.random() * 7) * 60 * 60 * 1000,
   },
   offers: [
-    {name: `Add luggage`, price: 20},
-    {name: `Switch to comfort class`, price: 30},
-    {name: `Add meal`, price: 10},
-    {name: `Choose seats`, price: 15}
+    {name: `Add luggage`, price: 20, checked: true},
+    {name: `Switch to comfort class`, price: 30, checked: false},
+    {name: `Add meal`, price: 10, checked: false},
+    {name: `Choose seats`, price: 15, checked: true}
   ]
 });
+
+const getRandomType = () =>{
+  const randomType = [
+    {name: `Taxi`, icon: `🚕`},
+    {name: `Bus`, icon: `🚌`},
+    {name: `Train`, icon: `🚂`},
+    {name: `Ship`, icon: `🛳️`},
+    {name: `Transport`, icon: `🚊`},
+    {name: `Drive`, icon: `🚗`},
+    {name: `Flight`, icon: `✈️`},
+    {name: `Check in`, icon: `🏨`},
+    {name: `Sightseeing`, icon: `🏛️`},
+    {name: `Restaurant`, icon: `🍴`}
+  ][Math.floor(Math.random() * 10)];
+
+  return randomType.name;
+};
