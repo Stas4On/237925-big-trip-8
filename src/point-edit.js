@@ -1,5 +1,6 @@
 import Component from './component';
 import utils from './utils';
+import constants from "./constants";
 
 export default class PointEdit extends Component {
   constructor(data) {
@@ -8,7 +9,6 @@ export default class PointEdit extends Component {
     this._picture = data.picture;
     this._description = data.description;
     this._type = data.type;
-    this._icons = data.icons;
     this._destination = data.destination;
     this._time = data.time;
     this._offers = data.offers;
@@ -22,7 +22,7 @@ export default class PointEdit extends Component {
     const entry = {
       price: ``,
       type: ``,
-      destination: new Set(),
+      destination: ``,
       time: {
         start: new Date(),
         end: new Date()
@@ -34,8 +34,6 @@ export default class PointEdit extends Component {
 
     for (const pair of formData.entries()) {
       const [property, value] = pair;
-
-      console.log(pair);
 
       if (pointEditMapper[property]) {
         pointEditMapper[property](value);
@@ -65,8 +63,8 @@ export default class PointEdit extends Component {
     return links.map((link) => `<img src="${link}" alt="picture from place" class="point__destination-image">`).join(``);
   }
 
-  _getOptionDestination(destinations) {
-    return [...destinations].map((destination) => `<option value="${destination}"></option>`).join(``);
+  _getOptionDestination() {
+    return [...constants.DESTINATION].map((destination) => `<option value="${destination}"></option>`).join(``);
 
   }
 
@@ -92,7 +90,7 @@ export default class PointEdit extends Component {
       </label>
 
       <div class="travel-way">
-        <label class="travel-way__label" for="travel-way__toggle">${utils.getIcons(this._icons, this._type)}</label>
+        <label class="travel-way__label" for="travel-way__toggle">${utils.getIcons(this._type)}</label>
 
         <input type="checkbox" class="travel-way__toggle visually-hidden" id="travel-way__toggle">
 
@@ -125,7 +123,7 @@ export default class PointEdit extends Component {
         <label class="point__destination-label" for="destination">${this._type} to</label>
         <input class="point__destination-input" list="destination-select" id="destination" value="Chamonix" name="destination">
         <datalist id="destination-select">
-          ${this._getOptionDestination(this._destination)}
+          ${this._getOptionDestination()}
         </datalist>
       </div>
 
@@ -193,16 +191,26 @@ export default class PointEdit extends Component {
     this._type = data.type;
     this._destination = data.destination;
     this._time = utils.parseTimeInterval(data.time);
-    console.log(`this._type`);
-    console.log(this._type);
   }
 
   static createMapper(target) {
     return {
-      "price": (value) => target.price = value,
-      'travel-way': (value) => target.type = value,
-      "destination": (value) => target.destination.add(value),
-      "time": (value) => target.time = value,
+      "price": (value) => {
+        target.price = value;
+        return target.price;
+      },
+      'travel-way': (value) => {
+        target.type = value[0].toUpperCase() + value.substring(1);
+        return target.type;
+      },
+      "destination": (value) => {
+        target.destination = value;
+        return target.destination;
+      },
+      "time": (value) => {
+        target.time = value;
+        return target.time;
+      },
       "offer": (value) => target.offers.add(value)
     };
   }

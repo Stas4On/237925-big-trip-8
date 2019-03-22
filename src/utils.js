@@ -1,4 +1,5 @@
 import moment from "moment";
+import constants from "./constants";
 
 export default {
   getTime: (ms) => {
@@ -19,14 +20,13 @@ export default {
 
     return {start: startTime, end: endTime};
   },
-  getIcons(icons, type) {
+  getIcons(type) {
     const currentType = type[0].toUpperCase() + type.slice(1);
     let currentIcon = ``;
-    console.log(icons);console.log(currentType);
 
-    for (const key in icons) {
+    for (const key in constants.ICONS) {
       if (key === currentType) {
-        currentIcon = icons[key];
+        currentIcon = constants.ICONS[key];
       }
     }
 

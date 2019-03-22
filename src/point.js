@@ -6,7 +6,6 @@ export default class Point extends Component {
     super();
     this._price = data.price;
     this._type = data.type;
-    this._icons = data.icons;
     this._destination = data.destination;
     this._time = data.time;
     this._offers = data.offers;
@@ -53,8 +52,8 @@ export default class Point extends Component {
 
   get template() {
     return `<article class="trip-point">
-          <i class="trip-icon">${utils.getIcons(this._icons, this._type)}</i>
-          <h3 class="trip-point__title">${this._type} to ${[...this._destination][Math.floor(Math.random() * 5)]}</h3>
+          <i class="trip-icon">${utils.getIcons(this._type)}</i>
+          <h3 class="trip-point__title">${this._type} to ${this._destination}</h3>
           <p class="trip-point__schedule">
             <span class="trip-point__timetable">${utils.getTime(this._time.start)}&nbsp;&mdash; ${utils.getTime(this._time.end)}</span>
             <span class="trip-point__duration">${utils.getDuration(this._time.start, this._time.end)}</span>

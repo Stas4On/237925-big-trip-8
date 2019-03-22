@@ -1,3 +1,5 @@
+import constants from "./constants";
+
 export default () => ({
   price: Math.floor(Math.random() * 10) * 10 + 10,
   picture: [
@@ -20,28 +22,10 @@ export default () => ({
     `In rutrum ac purus sit amet tempus`
   ][Math.floor(Math.random() * 10)],
   type: getRandomType(),
-  icons: {
-    "Taxi": `🚕`,
-    "Bus": `🚌`,
-    "Train": `🚂`,
-    "Ship": `🛳️`,
-    "Transport": `🚊`,
-    "Drive": `🚗`,
-    "Flight": `✈️`,
-    'Check in': `🏨`,
-    "Sightseeing": `🏛️`,
-    "Restaurant": `🍴`
-  },
-  destination: new Set([
-    `Airport`,
-    `Geneva`,
-    `Chamonix`,
-    `Amsterdam`,
-    `hotel`
-  ]),
+  destination: getDestinationRandom(),
   time: {
     start: Date.now() + 60 * 60 * 1000,
-    end: Date.now() + Math.floor(Math.random() * 7) * 60 * 60 * 1000,
+    end: Date.now() + Math.floor(Math.random() * 7 + 1) * 60 * 60 * 1000,
   },
   offers: [
     {name: `Add luggage`, price: 20, checked: true},
@@ -51,19 +35,14 @@ export default () => ({
   ]
 });
 
-const getRandomType = () =>{
-  const randomType = [
-    {name: `Taxi`, icon: `🚕`},
-    {name: `Bus`, icon: `🚌`},
-    {name: `Train`, icon: `🚂`},
-    {name: `Ship`, icon: `🛳️`},
-    {name: `Transport`, icon: `🚊`},
-    {name: `Drive`, icon: `🚗`},
-    {name: `Flight`, icon: `✈️`},
-    {name: `Check in`, icon: `🏨`},
-    {name: `Sightseeing`, icon: `🏛️`},
-    {name: `Restaurant`, icon: `🍴`}
-  ][Math.floor(Math.random() * 10)];
+const getRandomType = () => {
+  const randomType = constants.TYPE[Math.floor(Math.random() * 10)];
 
   return randomType.name;
+};
+
+const getDestinationRandom = () => {
+  const randomDestination = [...constants.DESTINATION][Math.floor(Math.random() * 5)];
+
+  return randomDestination;
 };
