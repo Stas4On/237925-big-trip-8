@@ -16,6 +16,7 @@ export default class PointEdit extends Component {
     this._onSubmit = null;
 
     this._onSubmitButtonClick = this._onSubmitButtonClick.bind(this);
+    this._onSelectOptionClick = this._onSelectOptionClick.bind(this);
   }
 
   _processForm(formData) {
@@ -25,7 +26,7 @@ export default class PointEdit extends Component {
       destination: ``,
       time: {
         start: new Date(),
-        end: new Date()
+        end: new Date(),
       },
       offers: new Set(),
     };
@@ -57,6 +58,10 @@ export default class PointEdit extends Component {
     }
 
     this.update(newData);
+  }
+
+  _onSelectOptionClick(evt) {
+
   }
 
   _getPicture(links) {
@@ -121,7 +126,7 @@ export default class PointEdit extends Component {
 
       <div class="point__destination-wrap">
         <label class="point__destination-label" for="destination">${this._type} to</label>
-        <input class="point__destination-input" list="destination-select" id="destination" value="Chamonix" name="destination">
+        <input class="point__destination-input" list="destination-select" id="destination" value="${this._destination}" name="destination">
         <datalist id="destination-select">
           ${this._getOptionDestination()}
         </datalist>
@@ -179,6 +184,14 @@ export default class PointEdit extends Component {
   bind() {
     this._element.querySelector(`form`)
       .addEventListener(`submit`, this._onSubmitButtonClick);
+
+    const options = this._element.querySelectorAll(`.travel-way__select-input`);
+
+    for (const option of options) {
+      if (option.value === this._type.toLowerCase()) {
+        option.checked = `checked`;
+      }
+    }
   }
 
   unbind() {
@@ -211,7 +224,7 @@ export default class PointEdit extends Component {
         target.time = value;
         return target.time;
       },
-      "offer": (value) => target.offers.add(value)
+      "offer": (value) => target.offers.add(value),
     };
   }
 }

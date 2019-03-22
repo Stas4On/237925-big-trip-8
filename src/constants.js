@@ -7,7 +7,7 @@ export default {
     "Transport": `🚊`,
     "Drive": `🚗`,
     "Flight": `✈️`,
-    'Check in': `🏨`,
+    'Check-in': `🏨`,
     "Sightseeing": `🏛️`,
     "Restaurant": `🍴`
   },
@@ -19,7 +19,7 @@ export default {
     {name: `Transport`, icon: `🚊`},
     {name: `Drive`, icon: `🚗`},
     {name: `Flight`, icon: `✈️`},
-    {name: `Check in`, icon: `🏨`},
+    {name: `Check-in`, icon: `🏨`},
     {name: `Sightseeing`, icon: `🏛️`},
     {name: `Restaurant`, icon: `🍴`}
   ],
