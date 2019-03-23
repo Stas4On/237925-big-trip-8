@@ -48,9 +48,7 @@ export default class PointEdit extends Component {
     evt.preventDefault();
 
     const currentForm = this._element.querySelector(`form`);
-
     const formData = new FormData(currentForm);
-
     const newData = this._processForm(formData);
 
     if (typeof this._onSubmit === `function`) {
@@ -60,8 +58,17 @@ export default class PointEdit extends Component {
     this.update(newData);
   }
 
-  _onSelectOptionClick(evt) {
+  _partialUpdate() {
+    this._element.innerHTML = this.template;
+  }
 
+  _onSelectOptionClick(evt) {
+    const value = evt.target.value;
+
+    this._type = value[0].toUpperCase() + value.substring(1);
+    this.unbind();
+    this._partialUpdate();
+    this.bind();
   }
 
   _getPicture(links) {
@@ -110,7 +117,7 @@ export default class PointEdit extends Component {
             <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-train" name="travel-way" value="train">
             <label class="travel-way__select-label" for="travel-way-train">🚂 train</label>
 
-            <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-flight" name="travel-way" value="flight" checked>
+            <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-flight" name="travel-way" value="flight">
             <label class="travel-way__select-label" for="travel-way-flight">✈️ flight</label>
           </div>
 
@@ -189,14 +196,21 @@ export default class PointEdit extends Component {
 
     for (const option of options) {
       if (option.value === this._type.toLowerCase()) {
-        option.checked = `checked`;
+        option.checked = true;
       }
+      option.addEventListener(`click`, this._onSelectOptionClick);
     }
   }
 
   unbind() {
     this._element.querySelector(`form`)
       .removeEventListener(`submit`, this._onSubmitButtonClick);
+
+    const options = this._element.querySelectorAll(`.travel-way__select-input`);
+
+    for (const option of options) {
+      option.removeEventListener(`click`, this._onSelectOptionClick);
+    }
   }
 
   update(data) {
