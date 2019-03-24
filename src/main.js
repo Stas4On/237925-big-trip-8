@@ -23,7 +23,14 @@ pointComponent.onEdit = () => {
   pointComponent.unrender();
 };
 
-pointEditComponent.onSubmit = () => {
+pointEditComponent.onSubmit = (newObject) => {
+  dataPoint.price = newObject.price;
+  dataPoint.type = newObject.type;
+  dataPoint.destination = newObject.destination;
+  dataPoint.time = newObject.time;
+  dataPoint.offers = newObject.offers;
+
+  pointComponent.update(dataPoint);
   pointComponent.render();
   pointsContainer.replaceChild(pointComponent.element, pointEditComponent.element);
   pointEditComponent.unrender();

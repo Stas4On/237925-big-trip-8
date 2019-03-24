@@ -15,6 +15,18 @@ export default class Point extends Component {
     this._onPointClick = this._onPointClick.bind(this);
   }
 
+  _setOffersStatus(offers, checkedOffers) {
+    const offersArray = [...checkedOffers].map((offer) => {
+      return offer.replace(/-/g, ` `);
+    });
+
+    for (const offer of offers) {
+      offer.checked = offersArray.indexOf(offer.name.toLowerCase()) !== -1;
+    }
+
+    return offers;
+  }
+
   _onPointClick() {
     if (typeof this._onEdit === `function`) {
       this._onEdit();
@@ -22,15 +34,12 @@ export default class Point extends Component {
   }
 
   _getOffers(offersArray) {
-    const OFFERS_ON_PAGE = 2;
     const selectedOffers = [];
 
-    for (let i = offersArray.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [offersArray[i], offersArray[j]] = [offersArray[j], offersArray[i]];
-    }
-    for (let i = 0; i < OFFERS_ON_PAGE; i++) {
-      selectedOffers.push(offersArray[i]);
+    for (let i = 0; i < offersArray.length; i++) {
+      if (offersArray[i].checked) {
+        selectedOffers.push(offersArray[i]);
+      }
     }
 
     return selectedOffers.map((offer) => `<li>
@@ -40,8 +49,8 @@ export default class Point extends Component {
 
   get template() {
     return `<article class="trip-point">
-          <i class="trip-icon">${this._type.icon}</i>
-          <h3 class="trip-point__title">${this._type.name} to ${[...this._destination][Math.floor(Math.random() * 5)]}</h3>
+          <i class="trip-icon">${utils.getIcons(this._type)}</i>
+          <h3 class="trip-point__title">${this._type} to ${this._destination}</h3>
           <p class="trip-point__schedule">
             <span class="trip-point__timetable">${utils.getTime(this._time.start)}&nbsp;&mdash; ${utils.getTime(this._time.end)}</span>
             <span class="trip-point__duration">${utils.getDuration(this._time.start, this._time.end)}</span>
@@ -65,5 +74,13 @@ export default class Point extends Component {
   unbind() {
     this._element.closest(`.trip-point`)
       .removeEventListener(`click`, this._onPointClick);
+  }
+
+  update(data) {
+    this._price = data.price;
+    this._type = data.type;
+    this._destination = data.destination;
+    this._time = data.time;
+    this._offers = this._setOffersStatus(this._offers, data.offers);
   }
 }

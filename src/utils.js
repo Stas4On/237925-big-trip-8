@@ -1,13 +1,9 @@
+import moment from "moment";
+import constants from "./constants";
+
 export default {
   getTime: (ms) => {
-    const currentDate = new Date(ms);
-    let minutes = currentDate.getMinutes();
-    let hours = currentDate.getHours();
-
-    hours = (hours >= 10) ? hours : `0` + hours;
-    minutes = (minutes >= 10) ? minutes : `0` + minutes;
-
-    return `${hours}:${minutes}`;
+    return moment(ms, `x`).format(`HH:mm`);
   },
   getDuration: (startTime, endTime) => {
     const duration = endTime - startTime;
@@ -17,4 +13,17 @@ export default {
 
     return `${hours}h ${minutes}m`;
   },
+  parseTimeInterval: (interval) => {
+    const dividedTime = interval.split(` `);
+    const startTime = moment(dividedTime[0], `HH:mm`).format(`x`);
+    const endTime = moment(dividedTime[2], `HH:mm`).format(`x`);
+
+    return {start: startTime, end: endTime};
+  },
+  getIcons(type) {
+    const currentType = type[0].toUpperCase() + type.slice(1);
+    const currentKey = Object.keys(constants.ICONS).find((key) => key === currentType);
+
+    return constants.ICONS[currentKey];
+  }
 };
