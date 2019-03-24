@@ -217,12 +217,12 @@ export default class PointEdit extends Component {
     this._price = data.price;
     this._type = data.type;
     this._destination = data.destination;
-    this._time = utils.parseTimeInterval(data.time);
+    this._time = data.time;
   }
 
   static createMapper(target) {
     return {
-      "price": (value) => {
+      'price': (value) => {
         target.price = value;
         return target.price;
       },
@@ -230,15 +230,15 @@ export default class PointEdit extends Component {
         target.type = value[0].toUpperCase() + value.substring(1);
         return target.type;
       },
-      "destination": (value) => {
+      'destination': (value) => {
         target.destination = value;
         return target.destination;
       },
-      "time": (value) => {
-        target.time = value;
+      'time': (value) => {
+        target.time = utils.parseTimeInterval(value);
         return target.time;
       },
-      "offer": (value) => target.offers.add(value),
+      'offer': (value) => target.offers.add(value),
     };
   }
 }

@@ -16,11 +16,8 @@ export default class Point extends Component {
   }
 
   _setOffersStatus(offers, checkedOffers) {
-    const offersArray = [];
-
-    checkedOffers.forEach((offer) => {
-      const formattedOffer = offer.split(`-`).join(` `);
-      offersArray.push(formattedOffer);
+    const offersArray = [...checkedOffers].map((offer) => {
+      return offer.replace(/-/g, ` `);
     });
 
     for (const offer of offers) {
@@ -83,7 +80,7 @@ export default class Point extends Component {
     this._price = data.price;
     this._type = data.type;
     this._destination = data.destination;
-    this._time = utils.parseTimeInterval(data.time);
+    this._time = data.time;
     this._offers = this._setOffersStatus(this._offers, data.offers);
   }
 }
