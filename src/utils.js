@@ -22,14 +22,8 @@ export default {
   },
   getIcons(type) {
     const currentType = type[0].toUpperCase() + type.slice(1);
-    let currentIcon = ``;
+    const currentKey = Object.keys(constants.ICONS).find((key) => key === currentType);
 
-    for (const key in constants.ICONS) {
-      if (key === currentType) {
-        currentIcon = constants.ICONS[key];
-      }
-    }
-
-    return currentIcon;
+    return constants.ICONS[currentKey];
   }
 };
