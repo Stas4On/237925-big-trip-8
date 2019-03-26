@@ -32,7 +32,8 @@ export default () => ({
     {name: `Switch to comfort class`, price: 30, checked: false},
     {name: `Add meal`, price: 10, checked: false},
     {name: `Choose seats`, price: 15, checked: true}
-  ]
+  ],
+  isDeleted: false
 });
 
 const getRandomType = () => {

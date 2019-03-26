@@ -9,6 +9,7 @@ export default class Point extends Component {
     this._destination = data.destination;
     this._time = data.time;
     this._offers = data.offers;
+    this._isDeleted = data.isDeleted;
     this._element = null;
     this._onEdit = null;
 
@@ -16,6 +17,7 @@ export default class Point extends Component {
   }
 
   _setOffersStatus(offers, checkedOffers) {
+    console.log(checkedOffers);
     const offersArray = [...checkedOffers].map((offer) => {
       return offer.replace(/-/g, ` `);
     });
@@ -82,5 +84,9 @@ export default class Point extends Component {
     this._destination = data.destination;
     this._time = data.time;
     this._offers = this._setOffersStatus(this._offers, data.offers);
+  }
+
+  delete() {
+    this._isDeleted = true;
   }
 }
