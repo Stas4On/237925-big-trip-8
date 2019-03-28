@@ -74,6 +74,9 @@ const filterPoints = (points, filterName) => {
 
     case `filter-past`:
       return points.filter((it) => it.date < Date.now());
+
+    default:
+      return points;
   }
 };
 
