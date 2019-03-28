@@ -25,8 +25,8 @@ const getRandomPoints = (number, func) => {
 };
 const dataPoints = getRandomPoints(numberPoints, getData);
 
-const renderPoints = (points) => {
-  pointsContainer.innerHTML = ``;
+const renderPoints = (points, container) => {
+  container.innerHTML = ``;
 
   for (let i = 0; i < points.length; i++) {
     const point = points[i];
@@ -35,7 +35,7 @@ const renderPoints = (points) => {
 
     pointComponent.onEdit = () => {
       pointEditComponent.render();
-      pointsContainer.replaceChild(pointEditComponent.element, pointComponent.element);
+      container.replaceChild(pointEditComponent.element, pointComponent.element);
       pointComponent.unrender();
     };
 
@@ -48,37 +48,39 @@ const renderPoints = (points) => {
 
       pointComponent.update(point);
       pointComponent.render();
-      pointsContainer.replaceChild(pointComponent.element, pointEditComponent.element);
+      container.replaceChild(pointComponent.element, pointEditComponent.element);
       pointEditComponent.unrender();
     };
 
     pointEditComponent.onDelete = () => {
       point.isDeleted = true;
       pointComponent.delete();
-      console.log(pointComponent.element);
-      console.log(pointEditComponent.element);
-
-      // pointsContainer.replaceChild(pointComponent.element, pointEditComponent.element);
       pointEditComponent.unrender();
     };
 
     if (!point.isDeleted) {
-      pointsContainer.appendChild(pointComponent.render());
+      container.appendChild(pointComponent.render());
     }
   }
 };
 
-const filterList = document.querySelectorAll(`.trip-filter__item`);
+const filterPoints = (points, filterName) => {
+  switch (filterName) {
+    case `filter-everything`:
+      return points;
 
-for (let i = 0; i < filterList.length; i++) {
-  filterList[i].addEventListener(`click`, () => {
-    const input = filterList[i].previousElementSibling;
+    case `filter-future`:
+      return points.filter((it) => it.date > Date.now());
 
-    if (!input.checked) {
-      console.log(dataPoints);
-      renderPoints(dataPoints);
-    }
-  });
-}
+    case `filter-past`:
+      return points.filter((it) => it.date < Date.now());
+  }
+};
 
-renderPoints(dataPoints);
+filters.onchange = (evt) => {
+  const filterName = evt.target.id;
+  const filteredTasks = filterPoints(dataPoints, filterName);
+  renderPoints(filteredTasks, pointsContainer);
+};
+
+renderPoints(dataPoints, pointsContainer);

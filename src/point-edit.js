@@ -57,7 +57,7 @@ export default class PointEdit extends Component {
 
   _onDeleteButtonClick(evt) {
     evt.preventDefault();
-    console.log(this._onDelete);
+
     if (typeof this._onDelete === `function`) {
       this._onDelete();
     }
@@ -69,7 +69,7 @@ export default class PointEdit extends Component {
     const currentForm = this._element.querySelector(`form`);
     const formData = new FormData(currentForm);
     const newData = this._processForm(formData);
-    console.log(this._onDelete);
+
     if (typeof this._onSubmit === `function`) {
       this._onSubmit(newData);
     }
@@ -247,10 +247,6 @@ export default class PointEdit extends Component {
     this._type = data.type;
     this._destination = data.destination;
     this._time = data.time;
-  }
-
-  delete() {
-    this._isDeleted = true;
   }
 
   static createMapper(target) {
