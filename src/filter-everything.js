@@ -1,5 +1,4 @@
 import Component from './component';
-import utils from './utils';
 
 export default class FilterEverything extends Component {
   constructor(data) {
@@ -43,13 +42,4 @@ export default class FilterEverything extends Component {
     this._element.closest(`.trip-point`)
       .removeEventListener(`click`, this._onPointClick);
   }
-
-  update(data) {
-    this._price = data.price;
-    this._type = data.type;
-    this._destination = data.destination;
-    this._time = data.time;
-    this._offers = data.offers;
-  }
-
 }

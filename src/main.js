@@ -84,10 +84,10 @@ const filterPoints = (points, filterName) => {
       return points;
 
     case `filter-future`:
-      return points.filter((it) => moment(it.date).isAfter(moment(), 'day'));
+      return points.filter((it) => moment(it.date).isAfter(moment(), `day`));
 
     case `filter-past`:
-      return points.filter((it) => moment(it.date).isBefore(moment(), 'day'));
+      return points.filter((it) => moment(it.date).isBefore(moment(), `day`));
 
     default:
       return points;
