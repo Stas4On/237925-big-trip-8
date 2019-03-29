@@ -16,19 +16,6 @@ export default class Point extends Component {
     this._onPointClick = this._onPointClick.bind(this);
   }
 
-  _setOffersStatus(offers, checkedOffers) {
-    console.log(checkedOffers);
-    const offersArray = [...checkedOffers].map((offer) => {
-      return offer.replace(/-/g, ` `);
-    });
-
-    for (const offer of offers) {
-      offer.checked = offersArray.indexOf(offer.name.toLowerCase()) !== -1;
-    }
-
-    return offers;
-  }
-
   _onPointClick() {
     if (typeof this._onEdit === `function`) {
       this._onEdit();
@@ -83,7 +70,7 @@ export default class Point extends Component {
     this._type = data.type;
     this._destination = data.destination;
     this._time = data.time;
-    this._offers = this._setOffersStatus(this._offers, data.offers);
+    this._offers = data.offers;
   }
 
   delete() {
