@@ -151,25 +151,27 @@ const getTransportStatData = (points, labels) => {
   });
 
   for (const point of points) {
-    switch (point.type) {
-      case `Flight`:
-        resultArray[formatedLabels.indexOf(`FLY`)] += 1;
-        break;
+    if (!point.isDeleted) {
+      switch (point.type) {
+        case `Flight`:
+          resultArray[formatedLabels.indexOf(`FLY`)] += 1;
+          break;
 
-      case `Taxi`:
-      case `Bus`:
-      case `Train`:
-      case `Transport`:
-        resultArray[formatedLabels.indexOf(`RIDE`)] += 1;
-        break;
+        case `Taxi`:
+        case `Bus`:
+        case `Train`:
+        case `Transport`:
+          resultArray[formatedLabels.indexOf(`RIDE`)] += 1;
+          break;
 
-      case `Drive`:
-        resultArray[formatedLabels.indexOf(`DRIVE`)] += 1;
-        break;
+        case `Drive`:
+          resultArray[formatedLabels.indexOf(`DRIVE`)] += 1;
+          break;
 
-      case `Ship`:
-        resultArray[formatedLabels.indexOf(`SAIL`)] += 1;
-        break;
+        case `Ship`:
+          resultArray[formatedLabels.indexOf(`SAIL`)] += 1;
+          break;
+      }
     }
   }
 
@@ -183,30 +185,32 @@ const getMoneyStatData = (points, labels) => {
   });
 
   for (const point of points) {
-    switch (point.type) {
-      case `Flight`:
-        resultArray[formatedLabels.indexOf(`FLY`)] += point.price;
-        break;
+    if (!point.isDeleted) {
+      switch (point.type) {
+        case `Flight`:
+          resultArray[formatedLabels.indexOf(`FLY`)] += point.price;
+          break;
 
-      case `Check-in`:
-        resultArray[formatedLabels.indexOf(`STAY`)] += point.price;
-        break;
+        case `Check-in`:
+          resultArray[formatedLabels.indexOf(`STAY`)] += point.price;
+          break;
 
-      case `Drive`:
-        resultArray[formatedLabels.indexOf(`DRIVE`)] += point.price;
-        break;
+        case `Drive`:
+          resultArray[formatedLabels.indexOf(`DRIVE`)] += point.price;
+          break;
 
-      case `Sightseeing`:
-        resultArray[formatedLabels.indexOf(`LOOK`)] += point.price;
-        break;
+        case `Sightseeing`:
+          resultArray[formatedLabels.indexOf(`LOOK`)] += point.price;
+          break;
 
-      case `Restaurant`:
-        resultArray[formatedLabels.indexOf(`EAT`)] += point.price;
-        break;
+        case `Restaurant`:
+          resultArray[formatedLabels.indexOf(`EAT`)] += point.price;
+          break;
 
-      default:
-        resultArray[formatedLabels.length - 1] += point.price;
-        break;
+        default:
+          resultArray[formatedLabels.length - 1] += point.price;
+          break;
+      }
     }
   }
 
