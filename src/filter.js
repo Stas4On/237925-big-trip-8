@@ -11,9 +11,9 @@ export default class Filter extends Component {
     this._onFilterClick = this._onFilterClick.bind(this);
   }
 
-  _onFilterClick() {
+  _onFilterClick(evt) {
     if (typeof this._onFilter === `function`) {
-      this._onFilter();
+      this._onFilter(evt);
     }
   }
 
@@ -33,13 +33,12 @@ export default class Filter extends Component {
   }
 
   bind() {
-    console.log(this._element);
-    this._element.querySelector(`.trip-filter__item`)
-      .addEventListener(`click `, this._onFilterClick);
+    this._element.querySelector(`#filter-${this._name}`)
+      .addEventListener(`change`, this._onFilterClick);
   }
 
   unbind() {
-    this._element.querySelector(`.trip-filter__item`)
-      .removeEventListener(`click `, this._onFilterClick);
+    this._element.querySelector(`#filter-${this._name}`)
+      .removeEventListener(`change`, this._onFilterClick);
   }
 }

@@ -1,4 +1,3 @@
-import makeFilter from '../src/make-filter.js';
 import Point from '../src/point';
 import PointEdit from '../src/point-edit';
 import Filter from '../src/filter';
@@ -22,10 +21,6 @@ const transportCtx = document.querySelector(`.statistic__transport`);
 
 moneyCtx.height = BAR_HEIGHT * 6;
 transportCtx.height = BAR_HEIGHT * 4;
-
-/*filters.insertAdjacentHTML(`beforeend`, makeFilter(`everything`, true));
-filters.insertAdjacentHTML(`beforeend`, makeFilter(`future`));
-filters.insertAdjacentHTML(`beforeend`, makeFilter(`past`));*/
 
 const numberPoints = getRandom(1, 8);
 
@@ -95,18 +90,6 @@ const filterPoints = (points, filterName) => {
       return points;
   }
 };
-
-/*filters.onchange = (evt) => {
-  const filterName = evt.target.id;
-  const filteredTasks = filterPoints(dataPoints, filterName);
-  renderPoints(filteredTasks, pointsContainer);
-
-  const dataMoney = getMoneyStatData(filteredTasks, LABELS_FOR_STAT_MONEY);
-  const dataTransport = getTransportStatData(filteredTasks, LABELS_FOR_STAT_TRANSPORT);
-
-  statistic.moneyChart(moneyCtx, LABELS_FOR_STAT_MONEY, dataMoney);
-  statistic.transportChart(transportCtx, LABELS_FOR_STAT_TRANSPORT, dataTransport);
-};*/
 
 const renderFilter = (dataFilters, container) => {
   container.innerHTML = ``;
