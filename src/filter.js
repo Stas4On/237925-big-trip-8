@@ -1,14 +1,14 @@
 import Component from './component';
 
-export default class FilterEverything extends Component {
+export default class Filter extends Component {
   constructor(data) {
     super();
     this._isChecked = data.isChecked;
-    this._name = null;
+    this._name = data.name;
     this._element = null;
     this._onFilter = null;
 
-    this._onFilterClick = this._onFilter.bind(this);
+    this._onFilterClick = this._onFilterClick.bind(this);
   }
 
   _onFilterClick() {
@@ -18,15 +18,14 @@ export default class FilterEverything extends Component {
   }
 
   get template() {
-    return `<input 
+    return `<li><input 
             type="radio" 
             id="filter-${this._name}" 
             name="filter" 
             value="${this._name}" 
             ${this._isChecked ? `checked` : ``}>
-                    
             <label class="trip-filter__item" 
-            for="filter-${this._name}">${this._name}</label>`;
+            for="filter-${this._name}">${this._name}</label></li>>`;
   }
 
   set onFilter(fn) {
@@ -34,12 +33,13 @@ export default class FilterEverything extends Component {
   }
 
   bind() {
-    this._element.closest(`.trip-point`)
-      .addEventListener(`click`, this._onPointClick);
+    console.log(this._element);
+    this._element.querySelector(`.trip-filter__item`)
+      .addEventListener(`click `, this._onFilterClick);
   }
 
   unbind() {
-    this._element.closest(`.trip-point`)
-      .removeEventListener(`click`, this._onPointClick);
+    this._element.querySelector(`.trip-filter__item`)
+      .removeEventListener(`click `, this._onFilterClick);
   }
 }

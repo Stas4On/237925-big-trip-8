@@ -1,7 +1,9 @@
 import makeFilter from '../src/make-filter.js';
 import Point from '../src/point';
 import PointEdit from '../src/point-edit';
+import Filter from '../src/filter';
 import getData from '../src/get-data';
+import getDataFilters from '../src/get-data-filters';
 import statistic from '../src/statistic';
 import moment from "moment";
 
@@ -14,16 +16,16 @@ const mainBlock = document.querySelector(`.main`);
 const statisticBlock = document.querySelector(`.statistic`);
 const pointsContainer = document.querySelector(`.trip-day__items`);
 const viewSwitches = document.querySelectorAll(`.view-switch__item`);
-const filters = document.querySelector(`.trip-filter`);
+const filters = document.querySelector(`.trip-filter__list`);
 const moneyCtx = document.querySelector(`.statistic__money`);
 const transportCtx = document.querySelector(`.statistic__transport`);
 
 moneyCtx.height = BAR_HEIGHT * 6;
 transportCtx.height = BAR_HEIGHT * 4;
 
-filters.insertAdjacentHTML(`beforeend`, makeFilter(`everything`, true));
+/*filters.insertAdjacentHTML(`beforeend`, makeFilter(`everything`, true));
 filters.insertAdjacentHTML(`beforeend`, makeFilter(`future`));
-filters.insertAdjacentHTML(`beforeend`, makeFilter(`past`));
+filters.insertAdjacentHTML(`beforeend`, makeFilter(`past`));*/
 
 const numberPoints = getRandom(1, 8);
 
@@ -94,7 +96,7 @@ const filterPoints = (points, filterName) => {
   }
 };
 
-filters.onchange = (evt) => {
+/*filters.onchange = (evt) => {
   const filterName = evt.target.id;
   const filteredTasks = filterPoints(dataPoints, filterName);
   renderPoints(filteredTasks, pointsContainer);
@@ -104,8 +106,35 @@ filters.onchange = (evt) => {
 
   statistic.moneyChart(moneyCtx, LABELS_FOR_STAT_MONEY, dataMoney);
   statistic.transportChart(transportCtx, LABELS_FOR_STAT_TRANSPORT, dataTransport);
+};*/
+
+const renderFilter = (dataFilters, container) => {
+  container.innerHTML = ``;
+
+  for (let i = 0; i < dataFilters.names.length; i++) {
+    const filter = {
+      name: dataFilters.names[i],
+      isChecked: dataFilters.isChecked === dataFilters.names[i]
+    };
+    const filterComponent = new Filter(filter);
+
+    filterComponent.onFilter = (evt) => {
+      const filterName = evt.target.id;
+      const filteredTasks = filterPoints(dataPoints, filterName);
+      renderPoints(filteredTasks, pointsContainer);
+
+      const dataMoney = getMoneyStatData(filteredTasks, LABELS_FOR_STAT_MONEY);
+      const dataTransport = getTransportStatData(filteredTasks, LABELS_FOR_STAT_TRANSPORT);
+
+      statistic.moneyChart(moneyCtx, LABELS_FOR_STAT_MONEY, dataMoney);
+      statistic.transportChart(transportCtx, LABELS_FOR_STAT_TRANSPORT, dataTransport);
+    };
+
+    container.appendChild(filterComponent.render());
+  }
 };
 
+renderFilter(getDataFilters(), filters);
 renderPoints(dataPoints, pointsContainer);
 
 for (const control of viewSwitches) {
