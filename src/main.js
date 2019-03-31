@@ -1,51 +1,218 @@
-import makeFilter from '../src/make-filter.js';
 import Point from '../src/point';
 import PointEdit from '../src/point-edit';
+import Filter from '../src/filter';
 import getData from '../src/get-data';
+import getDataFilters from '../src/get-data-filters';
+import statistic from '../src/statistic';
+import moment from "moment";
 
-const filters = document.querySelector(`.trip-filter`);
+const BAR_HEIGHT = 55;
+const LABELS_FOR_STAT_MONEY = [`✈️ FLY`, `🏨 STAY`, `🚗 DRIVE`, `🏛️ LOOK`, `🏨 EAT`, `🚕 RIDE`];
+const LABELS_FOR_STAT_TRANSPORT = [`🚗 DRIVE`, `🚕 RIDE`, `✈️ FLY`, `🛳️ SAIL`];
 
-filters.insertAdjacentHTML(`beforeend`, makeFilter(`everything`, true));
-filters.insertAdjacentHTML(`beforeend`, makeFilter(`future`));
-filters.insertAdjacentHTML(`beforeend`, makeFilter(`past`));
-
+const getRandom = (min, max) => Math.floor(Math.random() * (max - min)) + min;
+const mainBlock = document.querySelector(`.main`);
+const statisticBlock = document.querySelector(`.statistic`);
 const pointsContainer = document.querySelector(`.trip-day__items`);
+const viewSwitches = document.querySelectorAll(`.view-switch__item`);
+const filters = document.querySelector(`.trip-filter__list`);
+const moneyCtx = document.querySelector(`.statistic__money`);
+const transportCtx = document.querySelector(`.statistic__transport`);
 
-const dataPoint = getData();
-const pointComponent = new Point(dataPoint);
-const pointEditComponent = new PointEdit(dataPoint);
+moneyCtx.height = BAR_HEIGHT * 6;
+transportCtx.height = BAR_HEIGHT * 4;
 
-pointsContainer.appendChild(pointComponent.render());
+const numberPoints = getRandom(1, 8);
 
-pointComponent.onEdit = () => {
-  pointEditComponent.render();
-  pointsContainer.replaceChild(pointEditComponent.element, pointComponent.element);
-  pointComponent.unrender();
+const getRandomPoints = (number, func) => {
+  const resultPoint = [];
+
+  for (let i = 0; i <= number; i++) {
+    resultPoint.push(func());
+  }
+
+  return resultPoint;
 };
 
-pointEditComponent.onSubmit = (newObject) => {
-  dataPoint.price = newObject.price;
-  dataPoint.type = newObject.type;
-  dataPoint.destination = newObject.destination;
-  dataPoint.time = newObject.time;
-  dataPoint.offers = newObject.offers;
+const dataPoints = getRandomPoints(numberPoints, getData);
 
-  pointComponent.update(dataPoint);
-  pointComponent.render();
-  pointsContainer.replaceChild(pointComponent.element, pointEditComponent.element);
-  pointEditComponent.unrender();
+const renderPoints = (points, container) => {
+  container.innerHTML = ``;
+
+  for (let i = 0; i < points.length; i++) {
+    const point = points[i];
+    const pointComponent = new Point(point);
+    const pointEditComponent = new PointEdit(point);
+
+    pointComponent.onEdit = () => {
+      pointEditComponent.render();
+      container.replaceChild(pointEditComponent.element, pointComponent.element);
+      pointComponent.unrender();
+    };
+
+    pointEditComponent.onSubmit = (newObject) => {
+      point.price = newObject.price;
+      point.type = newObject.type;
+      point.destination = newObject.destination;
+      point.time = newObject.time;
+      point.offers = newObject.offers;
+
+      pointComponent.update(point);
+      pointComponent.render();
+      container.replaceChild(pointComponent.element, pointEditComponent.element);
+      pointEditComponent.unrender();
+    };
+
+    pointEditComponent.onDelete = () => {
+      point.isDeleted = true;
+      pointComponent.delete();
+      pointEditComponent.unrender();
+    };
+
+    if (!point.isDeleted) {
+      container.appendChild(pointComponent.render());
+    }
+  }
 };
 
-const filterList = document.querySelectorAll(`.trip-filter__item`);
+const filterPoints = (points, filterName) => {
+  switch (filterName) {
+    case `filter-everything`:
+      return points;
 
-for (let i = 0; i < filterList.length; i++) {
-  filterList[i].addEventListener(`click`, () => {
-    const input = filterList[i].previousElementSibling;
+    case `filter-future`:
+      return points.filter((it) => moment(it.date).isAfter(moment(), `day`));
 
-    if (!input.checked) {
-      pointsContainer.innerHTML = ``;
-      const newPoint = new Point(getData());
-      pointsContainer.appendChild(newPoint.render());
+    case `filter-past`:
+      return points.filter((it) => moment(it.date).isBefore(moment(), `day`));
+
+    default:
+      return points;
+  }
+};
+
+const renderFilter = (dataFilters, container) => {
+  container.innerHTML = ``;
+
+  for (let i = 0; i < dataFilters.names.length; i++) {
+    const filter = {
+      name: dataFilters.names[i],
+      isChecked: dataFilters.isChecked === dataFilters.names[i]
+    };
+    const filterComponent = new Filter(filter);
+
+    filterComponent.onFilter = (evt) => {
+      const filterName = evt.target.id;
+      const filteredTasks = filterPoints(dataPoints, filterName);
+      renderPoints(filteredTasks, pointsContainer);
+
+      const dataMoney = getMoneyStatData(filteredTasks, LABELS_FOR_STAT_MONEY);
+      const dataTransport = getTransportStatData(filteredTasks, LABELS_FOR_STAT_TRANSPORT);
+
+      statistic.moneyChart(moneyCtx, LABELS_FOR_STAT_MONEY, dataMoney);
+      statistic.transportChart(transportCtx, LABELS_FOR_STAT_TRANSPORT, dataTransport);
+    };
+
+    container.appendChild(filterComponent.render());
+  }
+};
+
+renderFilter(getDataFilters(), filters);
+renderPoints(dataPoints, pointsContainer);
+
+for (const control of viewSwitches) {
+  control.addEventListener(`click`, (evt) => {
+    evt.preventDefault();
+    document.querySelector(`.view-switch__item--active`).classList.remove(`view-switch__item--active`);
+    evt.target.classList.add(`view-switch__item--active`);
+
+    switch (evt.target.hash) {
+      case `#stats`:
+        mainBlock.classList.add(`visually-hidden`);
+        statisticBlock.classList.remove(`visually-hidden`);
+        const dataMoney = getMoneyStatData(dataPoints, LABELS_FOR_STAT_MONEY);
+        const dataTransport = getTransportStatData(dataPoints, LABELS_FOR_STAT_TRANSPORT);
+
+        statistic.moneyChart(moneyCtx, LABELS_FOR_STAT_MONEY, dataMoney);
+        statistic.transportChart(transportCtx, LABELS_FOR_STAT_TRANSPORT, dataTransport);
+        break;
+
+      case `#table`:
+        mainBlock.classList.remove(`visually-hidden`);
+        statisticBlock.classList.add(`visually-hidden`);
     }
   });
 }
+
+const getTransportStatData = (points, labels) => {
+  const resultArray = new Array(labels.length).fill(0);
+  const formatedLabels = labels.map((label) => {
+    return label.split(` `)[1];
+  });
+
+  for (const point of points) {
+    if (!point.isDeleted) {
+      switch (point.type) {
+        case `Flight`:
+          resultArray[formatedLabels.indexOf(`FLY`)] += 1;
+          break;
+
+        case `Taxi`:
+        case `Bus`:
+        case `Train`:
+        case `Transport`:
+          resultArray[formatedLabels.indexOf(`RIDE`)] += 1;
+          break;
+
+        case `Drive`:
+          resultArray[formatedLabels.indexOf(`DRIVE`)] += 1;
+          break;
+
+        case `Ship`:
+          resultArray[formatedLabels.indexOf(`SAIL`)] += 1;
+          break;
+      }
+    }
+  }
+
+  return resultArray;
+};
+
+const getMoneyStatData = (points, labels) => {
+  const resultArray = new Array(labels.length).fill(0);
+  const formatedLabels = labels.map((label) => {
+    return label.split(` `)[1];
+  });
+
+  for (const point of points) {
+    if (!point.isDeleted) {
+      switch (point.type) {
+        case `Flight`:
+          resultArray[formatedLabels.indexOf(`FLY`)] += point.price;
+          break;
+
+        case `Check-in`:
+          resultArray[formatedLabels.indexOf(`STAY`)] += point.price;
+          break;
+
+        case `Drive`:
+          resultArray[formatedLabels.indexOf(`DRIVE`)] += point.price;
+          break;
+
+        case `Sightseeing`:
+          resultArray[formatedLabels.indexOf(`LOOK`)] += point.price;
+          break;
+
+        case `Restaurant`:
+          resultArray[formatedLabels.indexOf(`EAT`)] += point.price;
+          break;
+
+        default:
+          resultArray[formatedLabels.length - 1] += point.price;
+          break;
+      }
+    }
+  }
+
+  return resultArray;
+};

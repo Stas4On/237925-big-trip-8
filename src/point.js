@@ -9,22 +9,11 @@ export default class Point extends Component {
     this._destination = data.destination;
     this._time = data.time;
     this._offers = data.offers;
+    this._isDeleted = data.isDeleted;
     this._element = null;
     this._onEdit = null;
 
     this._onPointClick = this._onPointClick.bind(this);
-  }
-
-  _setOffersStatus(offers, checkedOffers) {
-    const offersArray = [...checkedOffers].map((offer) => {
-      return offer.replace(/-/g, ` `);
-    });
-
-    for (const offer of offers) {
-      offer.checked = offersArray.indexOf(offer.name.toLowerCase()) !== -1;
-    }
-
-    return offers;
   }
 
   _onPointClick() {
@@ -81,6 +70,10 @@ export default class Point extends Component {
     this._type = data.type;
     this._destination = data.destination;
     this._time = data.time;
-    this._offers = this._setOffersStatus(this._offers, data.offers);
+    this._offers = data.offers;
+  }
+
+  delete() {
+    this._isDeleted = true;
   }
 }

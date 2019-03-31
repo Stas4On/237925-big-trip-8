@@ -12,11 +12,22 @@ export default class PointEdit extends Component {
     this._destination = data.destination;
     this._time = data.time;
     this._offers = data.offers;
+    this._isDeleted = data.isDeleted;
     this._element = null;
     this._onSubmit = null;
+    this._onDelete = null;
 
     this._onSubmitButtonClick = this._onSubmitButtonClick.bind(this);
+    this._onDeleteButtonClick = this._onDeleteButtonClick.bind(this);
     this._onSelectOptionClick = this._onSelectOptionClick.bind(this);
+  }
+
+  _resetOffers(offers) {
+    for (const offer of offers) {
+      offer.checked = false;
+    }
+
+    return offers;
   }
 
   _processForm(formData) {
@@ -28,7 +39,7 @@ export default class PointEdit extends Component {
         start: new Date(),
         end: new Date(),
       },
-      offers: new Set(),
+      offers: this._resetOffers(this._offers),
     };
 
     const pointEditMapper = PointEdit.createMapper(entry);
@@ -42,6 +53,14 @@ export default class PointEdit extends Component {
     }
 
     return entry;
+  }
+
+  _onDeleteButtonClick(evt) {
+    evt.preventDefault();
+
+    if (typeof this._onDelete === `function`) {
+      this._onDelete();
+    }
   }
 
   _onSubmitButtonClick(evt) {
@@ -119,14 +138,23 @@ export default class PointEdit extends Component {
 
             <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-flight" name="travel-way" value="flight">
             <label class="travel-way__select-label" for="travel-way-flight">✈️ flight</label>
+            
+            <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-transport" name="travel-way" value="transport">
+            <label class="travel-way__select-label" for="travel-way-transport">🚊 transport</label>
+            
+            <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-drive" name="travel-way" value="drive">
+            <label class="travel-way__select-label" for="travel-way-drive">🚗 drive</label>
           </div>
 
           <div class="travel-way__select-group">
             <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-check-in" name="travel-way" value="check-in">
             <label class="travel-way__select-label" for="travel-way-check-in">🏨 check-in</label>
 
-            <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-sightseeing" name="travel-way" value="sight-seeing">
+            <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-sightseeing" name="travel-way" value="sightseeing">
             <label class="travel-way__select-label" for="travel-way-sightseeing">🏛 sightseeing</label>
+            
+            <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-restaurant" name="travel-way" value="restaurant">
+            <label class="travel-way__select-label" for="travel-way-restaurant">🍴 restaurant</label>
           </div>
         </div>
       </div>
@@ -188,9 +216,16 @@ export default class PointEdit extends Component {
     this._onSubmit = fn;
   }
 
+  set onDelete(fn) {
+    this._onDelete = fn;
+  }
+
   bind() {
     this._element.querySelector(`form`)
       .addEventListener(`submit`, this._onSubmitButtonClick);
+
+    this._element.querySelector(`.point__button[type="reset"]`)
+      .addEventListener(`click`, this._onDeleteButtonClick);
 
     const options = this._element.querySelectorAll(`.travel-way__select-input`);
 
@@ -205,6 +240,9 @@ export default class PointEdit extends Component {
   unbind() {
     this._element.querySelector(`form`)
       .removeEventListener(`submit`, this._onSubmitButtonClick);
+
+    this._element.querySelector(`.point__button[type="reset"]`)
+      .removeEventListener(`click`, this._onDeleteButtonClick);
 
     const options = this._element.querySelectorAll(`.travel-way__select-input`);
 
@@ -223,7 +261,7 @@ export default class PointEdit extends Component {
   static createMapper(target) {
     return {
       'price': (value) => {
-        target.price = value;
+        target.price = +value;
         return target.price;
       },
       'travel-way': (value) => {
@@ -238,7 +276,15 @@ export default class PointEdit extends Component {
         target.time = utils.parseTimeInterval(value);
         return target.time;
       },
-      'offer': (value) => target.offers.add(value),
+      'offer': (value) => {
+        target.offers = target.offers.map((offer) => {
+          const val = value.replace(/-/g, ` `);
+          if (val === offer.name.toLowerCase()) {
+            offer.checked = true;
+          }
+          return offer;
+        });
+      },
     };
   }
 }
