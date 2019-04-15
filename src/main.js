@@ -141,11 +141,15 @@ const filterPoints = (points, filterName) => {
 
 const sortPoints = (points, sortName) => {
   const comparePrice = (a, b) => {
-    return a.price - b.price;
+    return b.price - a.price;
   };
 
   const compareId = (a, b) => {
     return a.id - b.id;
+  };
+
+  const compareTime = (a, b) => {
+    return (b.time.end - b.time.start) - (a.time.end - a.time.start);
   };
 
   switch (sortName) {
@@ -153,7 +157,7 @@ const sortPoints = (points, sortName) => {
       return points.sort(compareId);
 
     case `sorting-time`:
-      return points.filter((point) => moment(point.time.start).isAfter(moment(), `day`));
+      return points.sort(compareTime);
 
     case `sorting-price`:
       return points.sort(comparePrice);
