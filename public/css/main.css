@@ -455,13 +455,17 @@ input[type=radio]:checked + .trip-sorting__item {
   display: none;
 }
 .point__time {
-  font-size: 0;
   width: 130px;
   margin-right: 40px;
   display: flex;
 }
 .point__time .point__input {
   font-size: 17px;
+  text-align: center;
+}
+.point__time .point__devider {
+  padding-top: 2px;
+  border-bottom: 1px solid #0D8AE4;
 }
 .point__price {
   display: flex;
@@ -639,4 +643,29 @@ input[type=radio]:checked + .trip-sorting__item {
 .statistic__item {
   margin-bottom: 95px;
   width: 900px;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
+}
+.shake {
+  animation: shake 0.6s;
 }

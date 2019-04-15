@@ -13,17 +13,16 @@ export default {
 
     return `${hours}h ${minutes}m`;
   },
-  parseTimeInterval: (interval) => {
-    const dividedTime = interval.split(` `);
-    const startTime = moment(dividedTime[0], `HH:mm`).format(`x`);
-    const endTime = moment(dividedTime[2], `HH:mm`).format(`x`);
-
-    return {start: startTime, end: endTime};
+  timeToMs: (value) => {
+    return moment(value, `HH:mm`).format(`x`);
   },
   getIcons(type) {
     const currentType = type[0].toUpperCase() + type.slice(1);
     const currentKey = Object.keys(constants.ICONS).find((key) => key === currentType);
 
     return constants.ICONS[currentKey];
+  },
+  getCapitalizeWord(word) {
+    return `${word[0].toUpperCase()}${word.substring(1)}`;
   }
 };
