@@ -1,25 +1,29 @@
 import Component from './component';
 import utils from './utils';
-import constants from "./constants";
+import flatpickr from "flatpickr";
 
 export default class PointEdit extends Component {
   constructor(data) {
     super();
+    this._id = data.id;
     this._price = data.price;
-    this._picture = data.picture;
+    this._pictures = data.pictures;
     this._description = data.description;
     this._type = data.type;
     this._destination = data.destination;
     this._time = data.time;
     this._offers = data.offers;
-    this._isDeleted = data.isDeleted;
+    this._isFavorite = data.isFavorite;
     this._element = null;
     this._onSubmit = null;
     this._onDelete = null;
+    this._allDestinations = null;
+    this._allOffers = null;
 
     this._onSubmitButtonClick = this._onSubmitButtonClick.bind(this);
     this._onDeleteButtonClick = this._onDeleteButtonClick.bind(this);
-    this._onSelectOptionClick = this._onSelectOptionClick.bind(this);
+    this._onTypeOptionClick = this._onTypeOptionClick.bind(this);
+    // this._onDestinationsOptionClick = this._onDestinationsOptionClick.bind(this);
   }
 
   _resetOffers(offers) {
@@ -59,7 +63,7 @@ export default class PointEdit extends Component {
     evt.preventDefault();
 
     if (typeof this._onDelete === `function`) {
-      this._onDelete();
+      this._onDelete({id: this._id});
     }
   }
 
@@ -81,21 +85,34 @@ export default class PointEdit extends Component {
     this._element.innerHTML = this.template;
   }
 
-  _onSelectOptionClick(evt) {
+  _onTypeOptionClick(evt) {
     const value = evt.target.value;
+    const foundOffer = this._allOffers.filter((offer) => offer.type === value)[0];
 
-    this._type = value[0].toUpperCase() + value.substring(1);
+    this._type = value;
+    this._offers = foundOffer.offers;
     this.unbind();
     this._partialUpdate();
     this.bind();
   }
 
-  _getPicture(links) {
-    return links.map((link) => `<img src="${link}" alt="picture from place" class="point__destination-image">`).join(``);
+  // _onDestinationsOptionClick(value) {
+  //
+  //   const foundDestination = this._allDestinations.filter((destination) => destination.name === value)[0];
+  //   // this._destination = foundDestination.name;
+  //   this._description = foundDestination.description;
+  //   this._pictures = foundDestination.pictures;
+  //   this.unbind();
+  //   this._partialUpdate();
+  //   this.bind();
+  // }
+
+  _getPicture(pictures) {
+    return pictures.map((picture) => `<img src="${picture.src}" alt="${picture.description}" class="point__destination-image">`).join(``);
   }
 
-  _getOptionDestination() {
-    return [...constants.DESTINATION].map((destination) => `<option value="${destination}"></option>`).join(``);
+  _getOptionDestination(destinations) {
+    return destinations.map((destination) => `<option class="destination-option" value="${destination.name}"></option>`).join(``);
 
   }
 
@@ -138,12 +155,6 @@ export default class PointEdit extends Component {
 
             <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-flight" name="travel-way" value="flight">
             <label class="travel-way__select-label" for="travel-way-flight">✈️ flight</label>
-            
-            <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-transport" name="travel-way" value="transport">
-            <label class="travel-way__select-label" for="travel-way-transport">🚊 transport</label>
-            
-            <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-drive" name="travel-way" value="drive">
-            <label class="travel-way__select-label" for="travel-way-drive">🚗 drive</label>
           </div>
 
           <div class="travel-way__select-group">
@@ -152,24 +163,22 @@ export default class PointEdit extends Component {
 
             <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-sightseeing" name="travel-way" value="sightseeing">
             <label class="travel-way__select-label" for="travel-way-sightseeing">🏛 sightseeing</label>
-            
-            <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-restaurant" name="travel-way" value="restaurant">
-            <label class="travel-way__select-label" for="travel-way-restaurant">🍴 restaurant</label>
           </div>
         </div>
       </div>
 
       <div class="point__destination-wrap">
-        <label class="point__destination-label" for="destination">${this._type} to</label>
+        <label class="point__destination-label" for="destination">${utils.getCapitalizeWord(this._type)} to</label>
         <input class="point__destination-input" list="destination-select" id="destination" value="${this._destination}" name="destination">
         <datalist id="destination-select">
-          ${this._getOptionDestination()}
+          ${this._getOptionDestination(this._allDestinations)}
         </datalist>
       </div>
 
-      <label class="point__time">
-        choose time
-        <input class="point__input" type="text" value="${utils.getTime(this._time.start)} — ${utils.getTime(this._time.end)}" name="time" placeholder="00:00 — 00:00">
+      <label class="point__time" aria-label="choose time">
+        <input class="point__input" type="text" value="${utils.getTime(this._time.start)}" name="date-start" placeholder="19:00">
+        <span class="point__devider">&mdash;</span>
+        <input class="point__input" type="text" value="${utils.getTime(this._time.end)}" name="date-end" placeholder="21:00">
       </label>
 
       <label class="point__price">
@@ -184,7 +193,7 @@ export default class PointEdit extends Component {
       </div>
 
       <div class="paint__favorite-wrap">
-        <input type="checkbox" class="point__favorite-input visually-hidden" id="favorite" name="favorite">
+        <input type="checkbox" class="point__favorite-input visually-hidden" id="favorite" name="favorite" ${this._isFavorite ? `checked` : ``}>
         <label class="point__favorite" for="favorite">favorite</label>
       </div>
     </header>
@@ -202,7 +211,7 @@ export default class PointEdit extends Component {
         <h3 class="point__details-title">Destination</h3>
         <p class="point__destination-text">${this._description}</p>
         <div class="point__destination-images">
-          ${this._getPicture(this._picture)}
+          ${this._getPicture(this._pictures)}
         </div>
       </section>
       <input type="hidden" class="point__total-price" name="total-price" value="">
@@ -216,38 +225,71 @@ export default class PointEdit extends Component {
     this._onSubmit = fn;
   }
 
+  set allDestinations(data) {
+    this._allDestinations = data;
+  }
+
+  set allOffers(data) {
+    this._allOffers = data;
+  }
+
   set onDelete(fn) {
     this._onDelete = fn;
   }
 
   bind() {
     this._element.querySelector(`form`)
-      .addEventListener(`submit`, this._onSubmitButtonClick);
+    .addEventListener(`submit`, this._onSubmitButtonClick);
 
-    this._element.querySelector(`.point__button[type="reset"]`)
-      .addEventListener(`click`, this._onDeleteButtonClick);
+    this._element.querySelector(`.point__button[type='reset']`)
+    .addEventListener(`click`, this._onDeleteButtonClick);
 
-    const options = this._element.querySelectorAll(`.travel-way__select-input`);
+    const dateStart = this._element.querySelector(`.point__input[name='date-start']`);
+    const dateEnd = this._element.querySelector(`.point__input[name='date-end']`);
 
-    for (const option of options) {
-      if (option.value === this._type.toLowerCase()) {
+    flatpickr(dateStart, {
+      enableTime: true,
+      altInput: true,
+      altFormat: `H:i`,
+      dateFormat: `H:i`
+    });
+    flatpickr(dateEnd, {
+      enableTime: true,
+      altInput: true,
+      altFormat: `H:i`,
+      dateFormat: `H:i`
+    });
+
+    const optionsType = this._element.querySelectorAll(`.travel-way__select-input`);
+    // const destinationInput = this._element.querySelector(`.point__destination-input`);
+    //
+    // destinationInput.addEventListener(`change`, this._onDestinationsOptionClick(destinationInput.value));
+
+    for (const option of optionsType) {
+      if (option.value === this._type) {
         option.checked = true;
       }
-      option.addEventListener(`click`, this._onSelectOptionClick);
+      option.addEventListener(`click`, this._onTypeOptionClick);
     }
+
+
   }
 
   unbind() {
     this._element.querySelector(`form`)
-      .removeEventListener(`submit`, this._onSubmitButtonClick);
+    .removeEventListener(`submit`, this._onSubmitButtonClick);
 
     this._element.querySelector(`.point__button[type="reset"]`)
-      .removeEventListener(`click`, this._onDeleteButtonClick);
+    .removeEventListener(`click`, this._onDeleteButtonClick);
 
     const options = this._element.querySelectorAll(`.travel-way__select-input`);
 
+    // const destinationInput = this._element.querySelector(`.point__destination-input`);
+    //
+    // destinationInput.removeEventListener(`change`, this._onDestinationsOptionClick(destinationInput.value));
+
     for (const option of options) {
-      option.removeEventListener(`click`, this._onSelectOptionClick);
+      option.removeEventListener(`click`, this._onTypeOptionClick);
     }
   }
 
@@ -258,6 +300,15 @@ export default class PointEdit extends Component {
     this._time = data.time;
   }
 
+  shake() {
+    const ANIMATION_TIMEOUT = 600;
+    this._element.style.animation = `shake ${ANIMATION_TIMEOUT / 1000}s`;
+
+    setTimeout(() => {
+      this._element.style.animation = ``;
+    }, ANIMATION_TIMEOUT);
+  }
+
   static createMapper(target) {
     return {
       'price': (value) => {
@@ -265,15 +316,19 @@ export default class PointEdit extends Component {
         return target.price;
       },
       'travel-way': (value) => {
-        target.type = value[0].toUpperCase() + value.substring(1);
+        target.type = value;
         return target.type;
       },
       'destination': (value) => {
         target.destination = value;
         return target.destination;
       },
-      'time': (value) => {
-        target.time = utils.parseTimeInterval(value);
+      'date-start': (value) => {
+        target.time.start = utils.timeToMs(value);
+        return target.time;
+      },
+      'date-end': (value) => {
+        target.time.end = utils.timeToMs(value);
         return target.time;
       },
       'offer': (value) => {
