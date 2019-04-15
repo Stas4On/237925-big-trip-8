@@ -2,9 +2,10 @@ import Point from '../src/point';
 import PointEdit from '../src/point-edit';
 import API from '../src/api';
 import Filter from '../src/filter';
-import getDataFilters from '../src/get-data-filters';
+import getData from './get-data';
 import statistic from '../src/statistic';
 import moment from "moment";
+import Sorting from "./sorting";
 
 const BAR_HEIGHT = 55;
 const LABELS_FOR_STAT_MONEY = [`✈️ FLY`, `🏨 STAY`, `🚗 DRIVE`, `🏛️ LOOK`, `🏨 EAT`, `🚕 RIDE`];
@@ -17,6 +18,7 @@ const mainBlock = document.querySelector(`.main`);
 const statisticBlock = document.querySelector(`.statistic`);
 const viewSwitches = document.querySelectorAll(`.view-switch__item`);
 const filters = document.querySelector(`.trip-filter__list`);
+const tripSorting = document.querySelector(`.trip-sorting__list`);
 const moneyCtx = document.querySelector(`.statistic__money`);
 const transportCtx = document.querySelector(`.statistic__transport`);
 let dataPoints;
@@ -137,6 +139,30 @@ const filterPoints = (points, filterName) => {
   }
 };
 
+const sortPoints = (points, sortName) => {
+  const comparePrice = (a, b) => {
+    return a.price - b.price;
+  };
+
+  const compareId = (a, b) => {
+    return a.id - b.id;
+  };
+
+  switch (sortName) {
+    case `sorting-event`:
+      return points.sort(compareId);
+
+    case `sorting-time`:
+      return points.filter((point) => moment(point.time.start).isAfter(moment(), `day`));
+
+    case `sorting-price`:
+      return points.sort(comparePrice);
+
+    default:
+      return points;
+  }
+};
+
 const renderFilter = (dataFilters, container) => {
   container.innerHTML = ``;
 
@@ -163,15 +189,36 @@ const renderFilter = (dataFilters, container) => {
   }
 };
 
-renderFilter(getDataFilters(), filters);
+const renderSort = (dataSort, container) => {
+  container.innerHTML = ``;
 
-const getServerData = () => {
-  const destinations = api.getDestination()
+  for (let i = 0; i < dataSort.names.length; i++) {
+    const sort = {
+      name: dataSort.names[i],
+      isChecked: dataSort.isChecked === dataSort.names[i]
+    };
+    const sortingComponent = new Sorting(sort);
+
+    sortingComponent.onSort = (evt) => {
+      const sortName = evt.target.id;
+      const sortedTasks = sortPoints(dataPoints, sortName);
+      renderPoints(sortedTasks);
+    };
+
+    container.appendChild(sortingComponent.render());
+  }
+};
+
+renderFilter(getData().filters, filters);
+renderSort(getData().sorting, tripSorting);
+
+const getServerData = async () => {
+  const destinations = await api.getDestination()
   .then((data) => {
     return data;
   });
 
-  const offers = api.getOffers()
+  const offers = await api.getOffers()
   .then((data) => {
     return data;
   });

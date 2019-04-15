@@ -39,7 +39,8 @@ export default class ModelPoint {
       }),
       'date_from': this.time.start,
       'date_to': this.time.end,
-      'is_favorite': this.isFavorite
+      'is_favorite': this.isFavorite,
+      'type': this.type
     };
   }
 

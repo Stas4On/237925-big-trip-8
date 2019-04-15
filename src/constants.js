@@ -11,23 +11,12 @@ export default {
     "Sightseeing": `🏛️`,
     "Restaurant": `🍴`
   },
-  TYPE: [
-    {name: `Taxi`, icon: `🚕`},
-    {name: `Bus`, icon: `🚌`},
-    {name: `Train`, icon: `🚂`},
-    {name: `Ship`, icon: `🛳️`},
-    {name: `Transport`, icon: `🚊`},
-    {name: `Drive`, icon: `🚗`},
-    {name: `Flight`, icon: `✈️`},
-    {name: `Check-in`, icon: `🏨`},
-    {name: `Sightseeing`, icon: `🏛️`},
-    {name: `Restaurant`, icon: `🍴`}
-  ],
-  DESTINATION: new Set([
-    `Airport`,
-    `Geneva`,
-    `Chamonix`,
-    `Amsterdam`,
-    `hotel`
-  ])
+  FILTERS: {
+    names: [
+      `everything`,
+      `future`,
+      `past`
+    ],
+    isChecked: `everything`
+  }
 };

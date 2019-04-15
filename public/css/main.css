@@ -195,9 +195,19 @@ input[type=radio]:checked + .trip-filter__item {
 
 
 .trip-sorting {
+  display: flex;
+  align-items: center;
   box-sizing: border-box;
   margin-top: 24px;
   padding-left: 160px;
+}
+
+.trip-sorting__list {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0;
+  margin: 0;
+  list-style: none;
 }
 
 .trip-sorting input[type=radio] {
