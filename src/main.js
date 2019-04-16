@@ -2,6 +2,7 @@ import Point from '../src/point';
 import PointEdit from '../src/point-edit';
 import API from '../src/api';
 import Filter from '../src/filter';
+import totalCost from '../src/total-cost'
 import getData from './get-data';
 import statistic from '../src/statistic';
 import moment from "moment";
@@ -15,6 +16,7 @@ const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
 
 const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
 const mainBlock = document.querySelector(`.main`);
+const tripTotal = document.querySelector(`.trip__total`);
 const statisticBlock = document.querySelector(`.statistic`);
 const viewSwitches = document.querySelectorAll(`.view-switch__item`);
 const filters = document.querySelector(`.trip-filter__list`);
@@ -30,8 +32,7 @@ const renderPoints = (points, destinations, offers) => {
   const container = document.querySelector(`.trip-day__items`);
   container.innerHTML = ``;
 
-  for (let i = 0; i < points.length; i++) {
-    const point = points[i];
+  for (const point of points) {
     const pointComponent = new Point(point);
     const pointEditComponent = new PointEdit(point);
 
@@ -213,6 +214,27 @@ const renderSort = (dataSort, container) => {
   }
 };
 
+const renderTotalCost = (points, container) => {
+  container.innerHTML = ``;
+  let total = {
+    cost: 0
+  };
+
+  for (const point of points) {
+    total.cost += point.price;
+
+    for (const offer of point.offers) {
+      if(offer.checked) {
+        total.cost += offer.price;
+      }
+    }
+  }
+
+  const totalCostComponent = new totalCost(total);
+
+  container.appendChild(totalCostComponent.render());
+}
+
 renderFilter(getData().filters, filters);
 renderSort(getData().sorting, tripSorting);
 
@@ -231,6 +253,7 @@ const getServerData = async () => {
   .then((points) => {
     dataPoints = points;
     renderPoints(points, destinations, offers);
+    renderTotalCost(points, tripTotal);
   });
 };
 

@@ -176,9 +176,9 @@ export default class PointEdit extends Component {
       </div>
 
       <label class="point__time" aria-label="choose time">
-        <input class="point__input" type="text" value="${utils.getTime(this._time.start)}" name="date-start" placeholder="19:00">
+        <input class="point__input" type="text" value="${utils.getDate(this._time.start)}" name="date-start" placeholder="19:00">
         <span class="point__devider">&mdash;</span>
-        <input class="point__input" type="text" value="${utils.getTime(this._time.end)}" name="date-end" placeholder="21:00">
+        <input class="point__input" type="text" value="${utils.getDate(this._time.end)}" name="date-end" placeholder="21:00">
       </label>
 
       <label class="point__price">
@@ -251,13 +251,13 @@ export default class PointEdit extends Component {
       enableTime: true,
       altInput: true,
       altFormat: `H:i`,
-      dateFormat: `H:i`
+      dateFormat: `Y-m-d H:i`
     });
     flatpickr(dateEnd, {
       enableTime: true,
       altInput: true,
       altFormat: `H:i`,
-      dateFormat: `H:i`
+      dateFormat: `Y-m-d H:i`
     });
 
     const optionsType = this._element.querySelectorAll(`.travel-way__select-input`);

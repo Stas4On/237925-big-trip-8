@@ -27,8 +27,6 @@ export default class Sorting extends Component {
   }
 
   bind() {
-    console.log(this._element.querySelector(`#sorting-${this._name}`));
-
     this._element.querySelector(`#sorting-${this._name}`)
       .addEventListener(`change`, this._onSortButtonClick);
   }
