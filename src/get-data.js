@@ -1,3 +1,5 @@
+import moment from "moment";
+
 export default () => ({
   filters: {
     names: [
@@ -14,5 +16,19 @@ export default () => ({
       `price`,
     ],
     isChecked: `event`,
+  },
+  newPoint: {
+    'base_price': ``,
+    'type': `taxi`,
+    'destination': {
+      'description': [],
+      'name': ``,
+      'pictures': [],
+      'id': ``,
+      'is_favorite': false,
+    },
+    'date_from': moment(),
+    'date_to': moment(),
+    'offers': []
   }
 });

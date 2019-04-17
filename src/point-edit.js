@@ -333,8 +333,7 @@ export default class PointEdit extends Component {
       },
       'offer': (value) => {
         target.offers = target.offers.map((offer) => {
-          const val = value.replace(/-/g, ` `);
-          if (val === offer.name.toLowerCase()) {
+          if (value === offer.name.toLowerCase().replace(/ /g, `-`)) {
             offer.checked = true;
           }
           return offer;

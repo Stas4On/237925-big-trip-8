@@ -372,6 +372,10 @@ input[type=radio]:checked + .trip-sorting__item {
   transition: opacity 0.1s ease-out;
 }
 
+.trip-point__offer-item:nth-child(n + 4) {
+  display: none;
+}
+
 .trip-point__offer:hover {
   opacity: 1;
 }

@@ -6,7 +6,9 @@ import totalCost from '../src/total-cost'
 import getData from './get-data';
 import statistic from '../src/statistic';
 import moment from "moment";
+import constants from "./constants";
 import Sorting from "./sorting";
+import ModelPoint from './model-point';
 
 const BAR_HEIGHT = 55;
 const LABELS_FOR_STAT_MONEY = [`✈️ FLY`, `🏨 STAY`, `🚗 DRIVE`, `🏛️ LOOK`, `🏨 EAT`, `🚕 RIDE`];
@@ -23,7 +25,10 @@ const filters = document.querySelector(`.trip-filter__list`);
 const tripSorting = document.querySelector(`.trip-sorting__list`);
 const moneyCtx = document.querySelector(`.statistic__money`);
 const transportCtx = document.querySelector(`.statistic__transport`);
+const newEvent = document.querySelector(`.new-event`);
 let dataPoints;
+let destinations;
+let offers;
 
 moneyCtx.height = BAR_HEIGHT * 6;
 transportCtx.height = BAR_HEIGHT * 4;
@@ -46,10 +51,27 @@ const renderPoints = (points, destinations, offers) => {
       cardPoint.style.boxShadow = `0 11px 20px 0 rgba(0,0,0,0.22)`;
     };
 
+    const exit = (evt) => {
+      if (evt.keyCode === 27) {
+        evt.preventDefault();
+        removeHandler();
+
+        pointComponent.render();
+        container.replaceChild(pointComponent.element, pointEditComponent.element);
+        pointEditComponent.unrender();
+      }
+    };
+
+    const removeHandler = () => {
+      window.removeEventListener(`keydown`, exit);
+    }
+
     pointComponent.onEdit = () => {
       pointEditComponent.render();
       container.replaceChild(pointEditComponent.element, pointComponent.element);
       pointComponent.unrender();
+
+      window.addEventListener(`keydown`, exit);
     };
 
     pointEditComponent.allDestinations = destinations;
@@ -181,7 +203,7 @@ const renderFilter = (dataFilters, container) => {
     filterComponent.onFilter = (evt) => {
       const filterName = evt.target.id;
       const filteredTasks = filterPoints(dataPoints, filterName);
-      renderPoints(filteredTasks);
+      renderPoints(filteredTasks, destinations, offers);
 
       const dataMoney = getMoneyStatData(filteredTasks, LABELS_FOR_STAT_MONEY);
       const dataTransport = getTransportStatData(filteredTasks, LABELS_FOR_STAT_TRANSPORT);
@@ -206,8 +228,8 @@ const renderSort = (dataSort, container) => {
 
     sortingComponent.onSort = (evt) => {
       const sortName = evt.target.id;
-      const sortedTasks = sortPoints(dataPoints, sortName);
-      renderPoints(sortedTasks);
+      const sortedPoints = sortPoints(dataPoints, sortName);
+      renderPoints(sortedPoints, destinations, offers);
     };
 
     container.appendChild(sortingComponent.render());
@@ -239,14 +261,14 @@ renderFilter(getData().filters, filters);
 renderSort(getData().sorting, tripSorting);
 
 const getServerData = async () => {
-  const destinations = await api.getDestination()
+  await api.getDestination()
   .then((data) => {
-    return data;
+    destinations = data;
   });
 
-  const offers = await api.getOffers()
+  await api.getOffers()
   .then((data) => {
-    return data;
+    offers = data;
   });
 
   api.getPoint()
@@ -281,6 +303,57 @@ for (const control of viewSwitches) {
         statisticBlock.classList.add(`visually-hidden`);
     }
   });
+}
+
+const renderNewPoints = () => {
+  const container = document.querySelector(`.trip-day__items`);
+  const point = ModelPoint.parsePoint(getData().newPoint);
+  const pointComponent = new Point(point);
+  const pointEditComponent = new PointEdit(point);
+  pointEditComponent.allDestinations = destinations;
+  pointEditComponent.allOffers = offers;
+
+  container.insertBefore(pointEditComponent.render(), container.firstChild);
+
+  pointEditComponent.onSubmit = (newObject) => {
+    point.price = newObject.price;
+    point.type = newObject.type;
+    point.destination = newObject.destination;
+    point.time = newObject.time;
+    point.offers = newObject.offers;
+
+    const block = () => {
+      const buttonSubmit = pointEditComponent.element.querySelector(`.point__button[type='submit']`);
+      buttonSubmit.disabled = true;
+      buttonSubmit.textContent = `Saving...`;
+      pointEditComponent.element.querySelector(`.point__button[type='reset']`).disabled = true;
+    };
+
+    const unblock = () => {
+      const buttonSubmit = pointEditComponent.element.querySelector(`.point__button[type='submit']`);
+      buttonSubmit.disabled = false;
+      buttonSubmit.textContent = `Save`;
+      pointEditComponent.element.querySelector(`.point__button[type='reset']`).disabled = false;
+    };
+
+    block();
+    // hideError();
+    console.log(point.toServerData());
+    api.createPoint({point: point.toServerData()})
+      .then((newPoint) => {
+        console.log(newPoint);
+        unblock();
+        // pointComponent.update(newPoint);
+        // pointComponent.render();
+        // container.replaceChild(pointComponent.element, pointEditComponent.element);
+        // pointEditComponent.unrender();
+      })
+      .catch(() => {
+        pointEditComponent.shake();
+        unblock();
+        // showError();
+      });
+  };
 }
 
 const getTransportStatData = (points, labels) => {
@@ -351,3 +424,5 @@ const getMoneyStatData = (points, labels) => {
 
   return resultArray;
 };
+
+newEvent.addEventListener(`click`, renderNewPoints);

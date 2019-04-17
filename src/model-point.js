@@ -24,7 +24,6 @@ export default class ModelPoint {
     return {
       'id': this.id,
       'base_price': this.price,
-      'description': this.description,
       'destination': {
         name: this.destination,
         description: this.description,

@@ -32,7 +32,7 @@ export default class Point extends Component {
       }
     }
 
-    return selectedOffers.map((offer) => `<li>
+    return selectedOffers.map((offer) => `<li class="trip-point__offer-item">
               <button class="trip-point__offer">${offer.name} +&euro;&nbsp;${offer.price}</button>
             </li>`).join(``);
   }
