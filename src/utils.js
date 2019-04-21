@@ -27,8 +27,7 @@ export default {
     return moment(value).format(`x`);
   },
   getIcons(type) {
-    const currentType = type[0].toUpperCase() + type.slice(1);
-    const currentKey = Object.keys(constants.ICONS).find((key) => key === currentType);
+    const currentKey = Object.keys(constants.ICONS).find((key) => key === type);
 
     return constants.ICONS[currentKey];
   },

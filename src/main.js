@@ -2,11 +2,10 @@ import Point from '../src/point';
 import PointEdit from '../src/point-edit';
 import API from '../src/api';
 import Filter from '../src/filter';
-import totalCost from '../src/total-cost'
-import getData from './get-data';
+import TotalCost from '../src/total-cost';
 import statistic from '../src/statistic';
 import moment from "moment";
-import constants from "./constants";
+import Day from './day';
 import Sorting from "./sorting";
 import ModelPoint from './model-point';
 
@@ -18,60 +17,97 @@ const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
 
 const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
 const mainBlock = document.querySelector(`.main`);
-const tripTotal = document.querySelector(`.trip__total`);
+const tripDayContainer = document.querySelector(`.trip-points`);
 const statisticBlock = document.querySelector(`.statistic`);
 const viewSwitches = document.querySelectorAll(`.view-switch__item`);
-const filters = document.querySelector(`.trip-filter__list`);
-const tripSorting = document.querySelector(`.trip-sorting__list`);
 const moneyCtx = document.querySelector(`.statistic__money`);
 const transportCtx = document.querySelector(`.statistic__transport`);
-const newEvent = document.querySelector(`.new-event`);
-let dataPoints;
-let destinations;
-let offers;
+const timeCtx = document.querySelector(`.statistic__time-spend`);
+const newEventButton = document.querySelector(`.new-event`);
+
+const filtersList = {
+  names: [
+    `everything`,
+    `future`,
+    `past`,
+  ],
+  isChecked: `everything`,
+};
+const sortingList = {
+  names: [
+    `event`,
+    `time`,
+    `price`,
+  ],
+  isChecked: `event`,
+};
+
+const newPointData = {
+  isFavorite: false,
+  type: `taxi`,
+  description: ``,
+  pictures: [],
+  time: {
+    start: Date.now(),
+    end: Date.now()
+  },
+  price: 0,
+  offers: [],
+  destination: ``,
+};
+
+let dataPoints = null;
+let destinations = null;
+let offers = null;
+let filteredPoints = null;
+let sortedPoints = null;
+
+tripDayContainer.innerHTML = `Loading route...`;
 
 moneyCtx.height = BAR_HEIGHT * 6;
 transportCtx.height = BAR_HEIGHT * 4;
 
-const renderPoints = (points, destinations, offers) => {
-  const container = document.querySelector(`.trip-day__items`);
+const getSortedTripPointsByDay = (points) => {
+  let result = {};
+  for (let point of points) {
+    const day = moment(point.time.start).format(`D MMM YY`);
+
+    if (!result[day]) {
+      result[day] = [];
+    }
+
+    result[day].push(point);
+  }
+
+  return result;
+};
+
+const renderDays = (days) => {
+  tripDayContainer.innerHTML = ``;
+  const pointSortedDay = getSortedTripPointsByDay(days);
+
+  Object.entries(pointSortedDay).forEach((points) => {
+    const [day, eventList] = points;
+    const dayTripPoints = new Day(day).render();
+
+    tripDayContainer.appendChild(dayTripPoints);
+
+    const distEvents = dayTripPoints.querySelector(`.trip-day__items`);
+    renderPoints(eventList, distEvents);
+  });
+};
+
+const renderPoints = (points, container) => {
   container.innerHTML = ``;
 
   for (const point of points) {
     const pointComponent = new Point(point);
     const pointEditComponent = new PointEdit(point);
 
-    const showError = () => {
-      const cardPoint = pointEditComponent.element.closest(`.point`);
-      cardPoint.style.boxShadow = `0 11px 20px 0 rgba(0,0,0,0.22), 0 0 0 1px red`;
-    };
-
-    const hideError = () => {
-      const cardPoint = pointEditComponent.element.closest(`.point`);
-      cardPoint.style.boxShadow = `0 11px 20px 0 rgba(0,0,0,0.22)`;
-    };
-
-    const exit = (evt) => {
-      if (evt.keyCode === 27) {
-        evt.preventDefault();
-        removeHandler();
-
-        pointComponent.render();
-        container.replaceChild(pointComponent.element, pointEditComponent.element);
-        pointEditComponent.unrender();
-      }
-    };
-
-    const removeHandler = () => {
-      window.removeEventListener(`keydown`, exit);
-    }
-
     pointComponent.onEdit = () => {
       pointEditComponent.render();
       container.replaceChild(pointEditComponent.element, pointComponent.element);
       pointComponent.unrender();
-
-      window.addEventListener(`keydown`, exit);
     };
 
     pointEditComponent.allDestinations = destinations;
@@ -84,63 +120,51 @@ const renderPoints = (points, destinations, offers) => {
       point.time = newObject.time;
       point.offers = newObject.offers;
 
-      const block = () => {
-        const buttonSubmit = pointEditComponent.element.querySelector(`.point__button[type='submit']`);
-        buttonSubmit.disabled = true;
-        buttonSubmit.textContent = `Saving...`;
-        pointEditComponent.element.querySelector(`.point__button[type='reset']`).disabled = true;
-      };
-
-      const unblock = () => {
-        const buttonSubmit = pointEditComponent.element.querySelector(`.point__button[type='submit']`);
-        buttonSubmit.disabled = false;
-        buttonSubmit.textContent = `Save`;
-        pointEditComponent.element.querySelector(`.point__button[type='reset']`).disabled = false;
-      };
-
-      block();
-      hideError();
+      pointEditComponent.lockSave();
+      pointEditComponent.hideError();
 
       api.updatePoint({id: point.id, data: point.toServerData()})
       .then((newPoint) => {
-        unblock();
+        pointEditComponent.unlockSave();
+        pointEditComponent.unlockDelete();
         pointComponent.update(newPoint);
         pointComponent.render();
         container.replaceChild(pointComponent.element, pointEditComponent.element);
         pointEditComponent.unrender();
+        setTotalCost(dataPoints);
       })
       .catch(() => {
         pointEditComponent.shake();
-        unblock();
-        showError();
+        pointEditComponent.unlockSave();
+        pointEditComponent.showError();
       });
     };
 
     pointEditComponent.onDelete = (({id}) => {
-      const block = () => {
-        const buttonDelete = pointEditComponent.element.querySelector(`.point__button[type='reset']`);
-        buttonDelete.disabled = true;
-        buttonDelete.textContent = `Deleting...`;
-        pointEditComponent.element.querySelector(`.point__button[type='submit']`).disabled = true;
-      };
 
-      const unblock = () => {
-        const buttonDelete = pointEditComponent.element.querySelector(`.point__button[type='reset']`);
-        buttonDelete.disabled = false;
-        buttonDelete.textContent = `Delete`;
-        pointEditComponent.element.querySelector(`.point__button[type='submit']`).disabled = false;
-      };
+      pointEditComponent.lockDelete();
 
-      block();
       api.deletePoint({id})
       .then(() => api.getPoint())
-      .then(getServerData)
+      .then((response) => {
+        renderDays(response);
+        setTotalCost(response);
+      })
+      .then(() => {
+        pointEditComponent.unrender();
+      })
       .catch(() => {
         pointEditComponent.shake();
-        unblock();
-        showError();
+        pointEditComponent.unlockDelete();
+        pointEditComponent.showError();
       });
     });
+
+    pointEditComponent.onKeydownEsc = () => {
+      pointComponent.render(tripDayContainer);
+      container.replaceChild(pointComponent.element, pointEditComponent.element);
+      pointEditComponent.unrender();
+    };
 
     container.appendChild(pointComponent.render());
   }
@@ -148,13 +172,10 @@ const renderPoints = (points, destinations, offers) => {
 
 const filterPoints = (points, filterName) => {
   switch (filterName) {
-    case `filter-everything`:
-      return points;
-
-    case `filter-future`:
+    case `future`:
       return points.filter((point) => moment(point.time.start).isAfter(moment(), `day`));
 
-    case `filter-past`:
+    case `past`:
       return points.filter((point) => moment(point.time.start).isBefore(moment(), `day`));
 
     default:
@@ -167,30 +188,29 @@ const sortPoints = (points, sortName) => {
     return b.price - a.price;
   };
 
-  const compareId = (a, b) => {
-    return a.id - b.id;
+  const compareTime = (a, b) => {
+    return a.time.start - b.time.start;
   };
 
-  const compareTime = (a, b) => {
+  const compareInterval = (a, b) => {
     return (b.time.end - b.time.start) - (a.time.end - a.time.start);
   };
 
   switch (sortName) {
-    case `sorting-event`:
-      return points.sort(compareId);
+    case `time`:
+      return points.sort(compareInterval);
 
-    case `sorting-time`:
-      return points.sort(compareTime);
-
-    case `sorting-price`:
+    case `price`:
       return points.sort(comparePrice);
 
     default:
-      return points;
+      return points.sort(compareTime);
   }
 };
 
-const renderFilter = (dataFilters, container) => {
+const renderFilter = (dataFilters) => {
+  const container = document.querySelector(`.trip-filter__list`);
+
   container.innerHTML = ``;
 
   for (let i = 0; i < dataFilters.names.length; i++) {
@@ -201,22 +221,34 @@ const renderFilter = (dataFilters, container) => {
     const filterComponent = new Filter(filter);
 
     filterComponent.onFilter = (evt) => {
-      const filterName = evt.target.id;
-      const filteredTasks = filterPoints(dataPoints, filterName);
-      renderPoints(filteredTasks, destinations, offers);
+      const filterName = evt.target.id.split(`-`)[1];
+      filtersList.isChecked = filterName;
+      if (sortedPoints === null) {
+        sortedPoints = sortPoints(dataPoints, sortingList.isChecked);
+      }
 
-      const dataMoney = getMoneyStatData(filteredTasks, LABELS_FOR_STAT_MONEY);
-      const dataTransport = getTransportStatData(filteredTasks, LABELS_FOR_STAT_TRANSPORT);
-
-      statistic.moneyChart(moneyCtx, LABELS_FOR_STAT_MONEY, dataMoney);
-      statistic.transportChart(transportCtx, LABELS_FOR_STAT_TRANSPORT, dataTransport);
+      filteredPoints = filterPoints(sortedPoints, filterName);
+      renderDays(filteredPoints);
+      renderStatistic(filteredPoints);
     };
 
     container.appendChild(filterComponent.render());
   }
 };
 
-const renderSort = (dataSort, container) => {
+const renderStatistic = (points) => {
+  const dataMoney = getMoneyStatData(points, LABELS_FOR_STAT_MONEY);
+  const dataTransport = getTransportStatData(points, LABELS_FOR_STAT_TRANSPORT);
+  const dataTime = getTimeStatData(points);
+
+  statistic.moneyChart(moneyCtx, LABELS_FOR_STAT_MONEY, dataMoney);
+  statistic.transportChart(transportCtx, LABELS_FOR_STAT_TRANSPORT, dataTransport);
+  statistic.timeSpendChart(timeCtx, dataTime.labels, dataTime.data);
+};
+
+const renderSort = (dataSort) => {
+  const container = document.querySelector(`.trip-sorting__list`);
+
   container.innerHTML = ``;
 
   for (let i = 0; i < dataSort.names.length; i++) {
@@ -227,134 +259,43 @@ const renderSort = (dataSort, container) => {
     const sortingComponent = new Sorting(sort);
 
     sortingComponent.onSort = (evt) => {
-      const sortName = evt.target.id;
-      const sortedPoints = sortPoints(dataPoints, sortName);
-      renderPoints(sortedPoints, destinations, offers);
+      const sortName = evt.target.id.split(`-`)[1];
+      sortingList.isChecked = sortName;
+
+      if (!filteredPoints) {
+        filteredPoints = filterPoints(dataPoints, filtersList.isChecked);
+      }
+
+      sortedPoints = sortPoints(filteredPoints, sortName);
+      renderDays(sortedPoints);
     };
 
     container.appendChild(sortingComponent.render());
   }
 };
 
-const renderTotalCost = (points, container) => {
-  container.innerHTML = ``;
+const setTotalCost = (points) => {
+  const container = document.querySelector(`.trip__total`);
   let total = {
     cost: 0
   };
+
+  container.innerHTML = ``;
 
   for (const point of points) {
     total.cost += point.price;
 
     for (const offer of point.offers) {
-      if(offer.checked) {
+      if (offer.checked) {
         total.cost += offer.price;
       }
     }
   }
 
-  const totalCostComponent = new totalCost(total);
+  const totalCostComponent = new TotalCost(total);
 
   container.appendChild(totalCostComponent.render());
-}
-
-renderFilter(getData().filters, filters);
-renderSort(getData().sorting, tripSorting);
-
-const getServerData = async () => {
-  await api.getDestination()
-  .then((data) => {
-    destinations = data;
-  });
-
-  await api.getOffers()
-  .then((data) => {
-    offers = data;
-  });
-
-  api.getPoint()
-  .then((points) => {
-    dataPoints = points;
-    renderPoints(points, destinations, offers);
-    renderTotalCost(points, tripTotal);
-  });
 };
-
-getServerData();
-
-for (const control of viewSwitches) {
-  control.addEventListener(`click`, (evt) => {
-    evt.preventDefault();
-    document.querySelector(`.view-switch__item--active`).classList.remove(`view-switch__item--active`);
-    evt.target.classList.add(`view-switch__item--active`);
-
-    switch (evt.target.hash) {
-      case `#stats`:
-        mainBlock.classList.add(`visually-hidden`);
-        statisticBlock.classList.remove(`visually-hidden`);
-        const dataMoney = getMoneyStatData(dataPoints, LABELS_FOR_STAT_MONEY);
-        const dataTransport = getTransportStatData(dataPoints, LABELS_FOR_STAT_TRANSPORT);
-
-        statistic.moneyChart(moneyCtx, LABELS_FOR_STAT_MONEY, dataMoney);
-        statistic.transportChart(transportCtx, LABELS_FOR_STAT_TRANSPORT, dataTransport);
-        break;
-
-      case `#table`:
-        mainBlock.classList.remove(`visually-hidden`);
-        statisticBlock.classList.add(`visually-hidden`);
-    }
-  });
-}
-
-const renderNewPoints = () => {
-  const container = document.querySelector(`.trip-day__items`);
-  const point = ModelPoint.parsePoint(getData().newPoint);
-  const pointComponent = new Point(point);
-  const pointEditComponent = new PointEdit(point);
-  pointEditComponent.allDestinations = destinations;
-  pointEditComponent.allOffers = offers;
-
-  container.insertBefore(pointEditComponent.render(), container.firstChild);
-
-  pointEditComponent.onSubmit = (newObject) => {
-    point.price = newObject.price;
-    point.type = newObject.type;
-    point.destination = newObject.destination;
-    point.time = newObject.time;
-    point.offers = newObject.offers;
-
-    const block = () => {
-      const buttonSubmit = pointEditComponent.element.querySelector(`.point__button[type='submit']`);
-      buttonSubmit.disabled = true;
-      buttonSubmit.textContent = `Saving...`;
-      pointEditComponent.element.querySelector(`.point__button[type='reset']`).disabled = true;
-    };
-
-    const unblock = () => {
-      const buttonSubmit = pointEditComponent.element.querySelector(`.point__button[type='submit']`);
-      buttonSubmit.disabled = false;
-      buttonSubmit.textContent = `Save`;
-      pointEditComponent.element.querySelector(`.point__button[type='reset']`).disabled = false;
-    };
-
-    block();
-    // hideError();
-    console.log(point.toServerData());
-    api.createPoint({point: point.toServerData()})
-      .then((newPoint) => {
-        console.log(newPoint);
-        unblock();
-        // pointComponent.update(newPoint);
-        // pointComponent.render();
-        // container.replaceChild(pointComponent.element, pointEditComponent.element);
-        // pointEditComponent.unrender();
-      })
-      .catch(() => {
-        pointEditComponent.shake();
-        unblock();
-        // showError();
-      });
-  };
-}
 
 const getTransportStatData = (points, labels) => {
   const resultArray = new Array(labels.length).fill(0);
@@ -425,4 +366,119 @@ const getMoneyStatData = (points, labels) => {
   return resultArray;
 };
 
-newEvent.addEventListener(`click`, renderNewPoints);
+const getTimeStatData = (points) => {
+  const dataArray = [];
+  const labelsArray = [];
+
+  for (const point of points) {
+    const contains = labelsArray.indexOf(point.type);
+    const start = moment(+point.time.start);
+    const end = moment(+point.time.end);
+    const hours = end.diff(start, `hour`, true);
+
+    if (contains === -1) {
+      labelsArray.push(point.type);
+      dataArray.push(hours);
+    } else {
+      dataArray[contains] += hours;
+    }
+  }
+
+  return {labels: labelsArray, data: dataArray.map((hour) => Math.round(hour))};
+};
+
+newEventButton.addEventListener(`click`, () => {
+  newEventButton.disabled = true;
+
+  const point = ModelPoint.parsePoint(newPointData);
+  const newPointEditComponent = new PointEdit(point);
+
+  newPointEditComponent.allDestinations = destinations;
+  newPointEditComponent.allOffers = offers;
+
+  tripDayContainer.insertBefore(newPointEditComponent.render(), tripDayContainer.firstChild);
+
+  newPointEditComponent.onSubmit = (newObject) => {
+    point.price = newObject.price;
+    point.type = newObject.type;
+    point.isFavorite = newObject.isFavorite;
+    point.destination = newObject.destination;
+    point.pictures = newObject.pictures;
+    point.description = newObject.description;
+    point.time = newObject.time;
+    point.offers = newObject.offers;
+
+    newPointEditComponent.lockSave();
+    newPointEditComponent.hideError();
+
+    api.createPoint({point: point.toServerData()})
+    .then(() => {
+      newPointEditComponent.unlockSave();
+    })
+    .then(() => api.getPoint())
+    .then((points) => {
+      dataPoints = points;
+      renderDays(points);
+      newEventButton.disabled = false;
+      newPointEditComponent.unrender();
+      setTotalCost(points);
+    })
+    .catch(() => {
+      newPointEditComponent.shake();
+      newPointEditComponent.unlockSave();
+      newPointEditComponent.showError();
+    });
+  };
+  newPointEditComponent.onDelete = () => {
+    newPointEditComponent.lockDelete();
+    newPointEditComponent.unrender();
+    renderDays(dataPoints);
+    newEventButton.disabled = false;
+  };
+
+  newPointEditComponent.onKeydownEsc = () => {
+    newPointEditComponent.unlockDelete();
+    newPointEditComponent.unrender();
+    renderDays(dataPoints);
+    newEventButton.disabled = false;
+  };
+});
+
+document.addEventListener(`DOMContentLoaded`, () => {
+  renderFilter(filtersList);
+  renderSort(sortingList);
+
+  for (const control of viewSwitches) {
+    control.addEventListener(`click`, (evt) => {
+      evt.preventDefault();
+      document.querySelector(`.view-switch__item--active`).classList.remove(`view-switch__item--active`);
+      evt.target.classList.add(`view-switch__item--active`);
+
+      switch (evt.target.hash) {
+        case `#stats`:
+          mainBlock.classList.add(`visually-hidden`);
+          statisticBlock.classList.remove(`visually-hidden`);
+          renderStatistic(dataPoints);
+          break;
+
+        case `#table`:
+          mainBlock.classList.remove(`visually-hidden`);
+          statisticBlock.classList.add(`visually-hidden`);
+      }
+    });
+  }
+
+  Promise.all([api.getPoint(), api.getDestinations(), api.getOffers()])
+  .then(([responsePoints, responseDestinations, responseOffers]) => {
+    dataPoints = responsePoints;
+    destinations = responseDestinations;
+    offers = responseOffers;
+  })
+  .then(() => {
+    renderDays(dataPoints);
+    setTotalCost(dataPoints);
+  })
+  .catch(() => {
+    tripDayContainer.innerHTML = `Something went wrong while loading your route info. Check your connection or try again later`;
+  });
+});

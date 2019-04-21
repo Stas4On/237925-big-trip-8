@@ -42,7 +42,7 @@ export default class API {
       headers: new Headers({'Content-Type': `application/json`})
     })
     .then(toJSON)
-    .then(ModelPoint.parsePoints);
+    .then(ModelPoint.parsePoint);
   }
 
   updatePoint({id, data}) {
@@ -70,7 +70,7 @@ export default class API {
     });
   }
 
-  getDestination() {
+  getDestinations() {
     return this._load({url: `destinations`})
     .then(toJSON)
     .then(ModelDestination.parseDestinations);

@@ -1,14 +1,14 @@
 export default class ModelPoint {
   constructor(data) {
     this.id = data.id;
-    this.price = data.base_price;
-    this.pictures = data.destination.pictures;
-    this.description = data.destination.description;
+    this.price = data.base_price || 0;
+    this.pictures = data.destination.pictures || [];
+    this.description = data.destination.description || ``;
     this.type = data.type;
-    this.destination = data.destination.name;
+    this.destination = data.destination.name || ``;
     this.time = {
-      start: data.date_from,
-      end: data.date_to
+      start: data.date_from || Date.now(),
+      end: data.date_to || Date.now()
     };
     this.offers = data.offers.map((offer) => {
       return {
@@ -17,7 +17,7 @@ export default class ModelPoint {
         checked: offer.accepted
       };
     });
-    this.isFavorite = data.isFavorite;
+    this.isFavorite = data.isFavorite || false;
   }
 
   toServerData() {
@@ -36,8 +36,8 @@ export default class ModelPoint {
           accepted: offer.checked
         };
       }),
-      'date_from': this.time.start,
-      'date_to': this.time.end,
+      'date_from': +this.time.start,
+      'date_to': +this.time.end,
       'is_favorite': this.isFavorite,
       'type': this.type
     };
