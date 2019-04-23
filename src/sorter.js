@@ -1,6 +1,6 @@
 import Component from './component';
 
-export default class Sorting extends Component {
+export default class Sorter extends Component {
   constructor(data) {
     super();
     this._isChecked = data.isChecked;
@@ -8,13 +8,7 @@ export default class Sorting extends Component {
     this._element = null;
     this._onSort = null;
 
-    this._onSortButtonClick = this._onSortButtonClick.bind(this);
-  }
-
-  _onSortButtonClick(evt) {
-    if (typeof this._onSort === `function`) {
-      this._onSort(evt);
-    }
+    this._onClick = this._onClick.bind(this);
   }
 
   get template() {
@@ -26,13 +20,19 @@ export default class Sorting extends Component {
     this._onSort = fn;
   }
 
+  _onClick(evt) {
+    if (typeof this._onSort === `function`) {
+      this._onSort(evt);
+    }
+  }
+
   bind() {
     this._element.querySelector(`#sorting-${this._name}`)
-      .addEventListener(`change`, this._onSortButtonClick);
+      .addEventListener(`change`, this._onClick);
   }
 
   unbind() {
     this._element.querySelector(`#sorting-${this._name}`)
-      .removeEventListener(`change`, this._onSortButtonClick);
+      .removeEventListener(`change`, this._onClick);
   }
 }

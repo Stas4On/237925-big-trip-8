@@ -1,4 +1,4 @@
-export default class ModelPoint {
+export default class Point {
   constructor(data) {
     this.id = data.id;
     this.price = data.base_price || 0;
@@ -43,11 +43,11 @@ export default class ModelPoint {
     };
   }
 
-  static parsePoint(data) {
-    return new ModelPoint(data);
+  static parseOne(data) {
+    return new Point(data);
   }
 
-  static parsePoints(data) {
-    return data.map(ModelPoint.parsePoint);
+  static parseAll(data) {
+    return data.map(Point.parseOne);
   }
 }

@@ -8,13 +8,7 @@ export default class Filter extends Component {
     this._element = null;
     this._onFilter = null;
 
-    this._onFilterClick = this._onFilterClick.bind(this);
-  }
-
-  _onFilterClick(evt) {
-    if (typeof this._onFilter === `function`) {
-      this._onFilter(evt);
-    }
+    this._onClick = this._onClick.bind(this);
   }
 
   get template() {
@@ -32,13 +26,19 @@ export default class Filter extends Component {
     this._onFilter = fn;
   }
 
+  _onClick(evt) {
+    if (typeof this._onFilter === `function`) {
+      this._onFilter(evt);
+    }
+  }
+
   bind() {
     this._element.querySelector(`#filter-${this._name}`)
-      .addEventListener(`change`, this._onFilterClick);
+      .addEventListener(`change`, this._onClick);
   }
 
   unbind() {
     this._element.querySelector(`#filter-${this._name}`)
-      .removeEventListener(`change`, this._onFilterClick);
+      .removeEventListener(`change`, this._onClick);
   }
 }
