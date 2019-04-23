@@ -3,14 +3,14 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 import constants from './constants';
 
 export default {
-  moneyChart: (container, labelsArray, dataArray) => {
+  moneyChart: (container, labels, values) => {
     return new Chart(container, {
       plugins: [ChartDataLabels],
       type: `horizontalBar`,
       data: {
-        labels: labelsArray,
+        labels,
         datasets: [{
-          data: dataArray,
+          data: values,
           backgroundColor: `#ffffff`,
           hoverBackgroundColor: `#ffffff`,
           anchor: `start`,
@@ -69,14 +69,14 @@ export default {
       },
     });
   },
-  transportChart: (container, labelsArray, dataArray) => {
+  transportChart: (container, labels, values) => {
     return new Chart(container, {
       plugins: [ChartDataLabels],
       type: `horizontalBar`,
       data: {
-        labels: labelsArray,
+        labels,
         datasets: [{
-          data: dataArray,
+          data: values,
           backgroundColor: `#ffffff`,
           hoverBackgroundColor: `#ffffff`,
           anchor: `start`,
@@ -135,14 +135,14 @@ export default {
       },
     });
   },
-  timeSpendChart: (container, labelsArray, dataArray) => {
+  timeSpendChart: (container, labels, values) => {
     return new Chart(container, {
       plugins: [ChartDataLabels],
       type: `horizontalBar`,
       data: {
-        labels: labelsArray.map((type) => (`${constants.ICONS[type]} ${type.toUpperCase()} `)),
+        labels: labels.map((type) => (`${constants.ICONS[type]} ${type.toUpperCase()} `)),
         datasets: [{
-          data: dataArray,
+          data: values,
           backgroundColor: `#ffffff`,
           hoverBackgroundColor: `#ffffff`,
           anchor: `start`

@@ -6,8 +6,8 @@ import TotalCost from '../src/total-cost';
 import statistic from '../src/statistic';
 import moment from "moment";
 import Day from './day';
-import Sorting from "./sorting";
-import ModelPoint from './model-point';
+import Sorter from "./sorter";
+import ModelPoint from './models/point';
 
 const BAR_HEIGHT = 55;
 const LABELS_FOR_STAT_MONEY = [`✈️ FLY`, `🏨 STAY`, `🚗 DRIVE`, `🏛️ LOOK`, `🏨 EAT`, `🚕 RIDE`];
@@ -213,10 +213,10 @@ const renderFilter = (dataFilters) => {
 
   container.innerHTML = ``;
 
-  for (let i = 0; i < dataFilters.names.length; i++) {
+  for (const name of dataFilters.names) {
     const filter = {
-      name: dataFilters.names[i],
-      isChecked: dataFilters.isChecked === dataFilters.names[i]
+      name: name,
+      isChecked: dataFilters.isChecked === name
     };
     const filterComponent = new Filter(filter);
 
@@ -251,12 +251,12 @@ const renderSort = (dataSort) => {
 
   container.innerHTML = ``;
 
-  for (let i = 0; i < dataSort.names.length; i++) {
+  for (const name of dataSort.names) {
     const sort = {
-      name: dataSort.names[i],
-      isChecked: dataSort.isChecked === dataSort.names[i]
+      name: name,
+      isChecked: dataSort.isChecked === name
     };
-    const sortingComponent = new Sorting(sort);
+    const sortingComponent = new Sorter(sort);
 
     sortingComponent.onSort = (evt) => {
       const sortName = evt.target.id.split(`-`)[1];
@@ -367,30 +367,30 @@ const getMoneyStatData = (points, labels) => {
 };
 
 const getTimeStatData = (points) => {
-  const dataArray = [];
-  const labelsArray = [];
+  const values = [];
+  const labels = [];
 
   for (const point of points) {
-    const contains = labelsArray.indexOf(point.type);
+    const contains = labels.indexOf(point.type);
     const start = moment(+point.time.start);
     const end = moment(+point.time.end);
     const hours = end.diff(start, `hour`, true);
 
     if (contains === -1) {
-      labelsArray.push(point.type);
-      dataArray.push(hours);
+      labels.push(point.type);
+      values.push(hours);
     } else {
-      dataArray[contains] += hours;
+      values[contains] += hours;
     }
   }
 
-  return {labels: labelsArray, data: dataArray.map((hour) => Math.round(hour))};
+  return {labels, data: values.map((value) => Math.round(value))};
 };
 
 newEventButton.addEventListener(`click`, () => {
   newEventButton.disabled = true;
 
-  const point = ModelPoint.parsePoint(newPointData);
+  const point = ModelPoint.parseOne(newPointData);
   const newPointEditComponent = new PointEdit(point);
 
   newPointEditComponent.allDestinations = destinations;

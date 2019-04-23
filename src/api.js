@@ -1,6 +1,6 @@
-import ModelPoint from './model-point';
-import ModelDestination from "./model-destination";
-import ModelOffer from './model-offer';
+import ModelPoint from './models/point';
+import ModelDestination from "./models/destination";
+import ModelOffer from './models/offer';
 
 const Method = {
   GET: `GET`,
@@ -21,17 +21,26 @@ const toJSON = (response) => {
   return response.json();
 };
 
-
 export default class API {
   constructor({endPoint, authorization}) {
     this._endPoint = endPoint;
     this._authorization = authorization;
   }
 
+  _load({url, method = Method.GET, body = null, headers = new Headers()}) {
+    headers.append(`Authorization`, this._authorization);
+
+    return fetch(`${this._endPoint}/${url}`, {method, body, headers})
+      .then(checkStatus)
+      .catch((err) => {
+        throw err;
+      });
+  }
+
   getPoint() {
     return this._load({url: `points`})
     .then(toJSON)
-    .then(ModelPoint.parsePoints);
+    .then(ModelPoint.parseAll);
   }
 
   createPoint({point}) {
@@ -42,7 +51,7 @@ export default class API {
       headers: new Headers({'Content-Type': `application/json`})
     })
     .then(toJSON)
-    .then(ModelPoint.parsePoint);
+    .then(ModelPoint.parseOne);
   }
 
   updatePoint({id, data}) {
@@ -53,32 +62,22 @@ export default class API {
       headers: new Headers({'Content-Type': `application/json`})
     })
     .then(toJSON)
-    .then(ModelPoint.parsePoint);
+    .then(ModelPoint.parseOne);
   }
 
   deletePoint({id}) {
     return this._load({url: `points/${id}`, method: Method.DELETE});
   }
 
-  _load({url, method = Method.GET, body = null, headers = new Headers()}) {
-    headers.append(`Authorization`, this._authorization);
-
-    return fetch(`${this._endPoint}/${url}`, {method, body, headers})
-    .then(checkStatus)
-    .catch((err) => {
-      throw err;
-    });
-  }
-
   getDestinations() {
     return this._load({url: `destinations`})
     .then(toJSON)
-    .then(ModelDestination.parseDestinations);
+    .then(ModelDestination.parseAll);
   }
 
   getOffers() {
     return this._load({url: `offers`})
     .then(toJSON)
-    .then(ModelOffer.parseOffers);
+    .then(ModelOffer.parseAll);
   }
 }

@@ -16,27 +16,6 @@ export default class Point extends Component {
     this._onPointClick = this._onPointClick.bind(this);
   }
 
-  _onPointClick(evt) {
-    evt.stopPropagation();
-    if (typeof this._onEdit === `function`) {
-      this._onEdit();
-    }
-  }
-
-  _getOffers(offersArray) {
-    const selectedOffers = [];
-
-    for (let i = 0; i < offersArray.length; i++) {
-      if (offersArray[i].checked) {
-        selectedOffers.push(offersArray[i]);
-      }
-    }
-
-    return selectedOffers.map((offer) => `<li class="trip-point__offer-item">
-              <button class="trip-point__offer">${offer.name} +&euro;&nbsp;${offer.price}</button>
-            </li>`).join(``);
-  }
-
   get template() {
     return `<article class="trip-point">
           <i class="trip-icon">${utils.getIcons(this._type)}</i>
@@ -47,13 +26,28 @@ export default class Point extends Component {
           </p>
           <p class="trip-point__price">&euro;&nbsp;${this._price}</p>
           <ul class="trip-point__offers">
-            ${this._getOffers(this._offers)}
+            ${Point.getOffers(this._offers)}
           </ul>
         </article>`;
   }
 
   set onEdit(fn) {
     this._onEdit = fn;
+  }
+
+  _onPointClick(evt) {
+    evt.stopPropagation();
+    if (typeof this._onEdit === `function`) {
+      this._onEdit();
+    }
+  }
+
+  update(data) {
+    this._price = data.price;
+    this._type = data.type;
+    this._destination = data.destination;
+    this._time = data.time;
+    this._offers = data.offers;
   }
 
   bind() {
@@ -66,11 +60,17 @@ export default class Point extends Component {
       .removeEventListener(`click`, this._onPointClick);
   }
 
-  update(data) {
-    this._price = data.price;
-    this._type = data.type;
-    this._destination = data.destination;
-    this._time = data.time;
-    this._offers = data.offers;
+  static getOffers(offersArray) {
+    const selectedOffers = [];
+
+    for (const offer of offersArray) {
+      if (offer.checked) {
+        selectedOffers.push(offer);
+      }
+    }
+
+    return selectedOffers.map((offer) => `<li class="trip-point__offer-item">
+              <button class="trip-point__offer">${offer.name} +&euro;&nbsp;${offer.price}</button>
+            </li>`).join(``);
   }
 }
