@@ -215,7 +215,7 @@ const renderFilter = (dataFilters) => {
 
   for (const name of dataFilters.names) {
     const filter = {
-      name: name,
+      name,
       isChecked: dataFilters.isChecked === name
     };
     const filterComponent = new Filter(filter);
@@ -253,7 +253,7 @@ const renderSort = (dataSort) => {
 
   for (const name of dataSort.names) {
     const sort = {
-      name: name,
+      name,
       isChecked: dataSort.isChecked === name
     };
     const sortingComponent = new Sorter(sort);
