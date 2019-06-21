@@ -1,6 +1,8 @@
 import Point from '../src/point';
 import PointEdit from '../src/point-edit';
 import API from '../src/api';
+import Provider from '../src/provider';
+import Store from "../src/store";
 import Filter from '../src/filter';
 import TotalCost from '../src/total-cost';
 import statistic from '../src/statistic';
@@ -14,8 +16,11 @@ const LABELS_FOR_STAT_MONEY = [`✈️ FLY`, `🏨 STAY`, `🚗 DRIVE`, `🏛️
 const LABELS_FOR_STAT_TRANSPORT = [`🚗 DRIVE`, `🚕 RIDE`, `✈️ FLY`, `🛳️ SAIL`];
 const AUTHORIZATION = `Basic dXNlcjpwYXNzd29yZA==${Math.random()}`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
+const POINT_STORE_KEY = `points-store-key`;
 
 const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
+const store = new Store({key: POINT_STORE_KEY, storage: localStorage});
+const provider = new Provider({api, store});
 const mainBlock = document.querySelector(`.main`);
 const tripDayContainer = document.querySelector(`.trip-points`);
 const statisticBlock = document.querySelector(`.statistic`);
@@ -61,6 +66,12 @@ let destinations = null;
 let offers = null;
 let filteredPoints = null;
 let sortedPoints = null;
+
+window.addEventListener(`offline`, () => document.title = `${document.title}[OFFLINE]`);
+window.addEventListener(`online`, () => {
+  document.title = document.title.split(`[OFFLINE]`)[0];
+  provider.syncPoints();
+});
 
 tripDayContainer.innerHTML = `Loading route...`;
 
@@ -123,7 +134,7 @@ const renderPoints = (points, container) => {
       pointEditComponent.lockSave();
       pointEditComponent.hideError();
 
-      api.updatePoint({id: point.id, data: point.toServerData()})
+      provider.updatePoint({id: point.id, data: point.toServerData()})
       .then((newPoint) => {
         pointEditComponent.unlockSave();
         pointEditComponent.unlockDelete();
@@ -144,8 +155,8 @@ const renderPoints = (points, container) => {
 
       pointEditComponent.lockDelete();
 
-      api.deletePoint({id})
-      .then(() => api.getPoint())
+      provider.deletePoint({id})
+      .then(() => provider.getPoints())
       .then((response) => {
         renderDays(response);
         setTotalCost(response);
@@ -411,11 +422,11 @@ newEventButton.addEventListener(`click`, () => {
     newPointEditComponent.lockSave();
     newPointEditComponent.hideError();
 
-    api.createPoint({point: point.toServerData()})
+    provider.createPoint({point: point.toServerData()})
     .then(() => {
       newPointEditComponent.unlockSave();
     })
-    .then(() => api.getPoint())
+    .then(() => provider.getPoints())
     .then((points) => {
       dataPoints = points;
       renderDays(points);
@@ -468,7 +479,7 @@ document.addEventListener(`DOMContentLoaded`, () => {
     });
   }
 
-  Promise.all([api.getPoint(), api.getDestinations(), api.getOffers()])
+  Promise.all([provider.getPoints(), api.getDestinations(), api.getOffers()])
   .then(([responsePoints, responseDestinations, responseOffers]) => {
     dataPoints = responsePoints;
     destinations = responseDestinations;

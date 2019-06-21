@@ -34,4 +34,7 @@ export default {
   getCapitalizeWord(word) {
     return `${word[0].toUpperCase()}${word.substring(1)}`;
   },
+  objectToArray(object) {
+    return Object.keys(object).map((id) => object[id]);
+  },
 };
